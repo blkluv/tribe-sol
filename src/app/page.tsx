@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -12,6 +11,8 @@ import {
   MessageCircle,
   ArrowRight,
   Sparkles,
+  Upload,
+  Plus,
 } from "lucide-react";
 
 const features = [
@@ -19,226 +20,201 @@ const features = [
     icon: MapPin,
     title: "Hyperlocal Discovery",
     description: "Find events, people, and communities right in your neighborhood.",
-    color: "#6366F1",
   },
   {
     icon: Users,
     title: "Join Tribes",
     description: "Connect with like-minded people in interest-based local communities.",
-    color: "#14B8A6",
   },
   {
     icon: Calendar,
     title: "Local Events",
     description: "Discover and create events happening around you. From meetups to cleanups.",
-    color: "#FB7185",
   },
   {
     icon: Heart,
     title: "Karma & Reputation",
     description: "Earn karma for contributing to your community. Level up from Newcomer to Legend.",
-    color: "#A78BFA",
   },
   {
     icon: Wallet,
     title: "Tip & Support",
     description: "Tip great content creators and support community crowdfunds.",
-    color: "#FB923C",
   },
   {
     icon: MessageCircle,
     title: "Tribe Chat",
     description: "Real-time conversations with your tribe members. Stay connected.",
-    color: "#38BDF8",
   },
 ];
 
 const cities = [
-  { name: "Bangalore", emoji: "🇮🇳", color: "#6366F1", members: "15K+" },
-  { name: "Mumbai", emoji: "🇮🇳", color: "#FB7185", members: "23K+" },
-  { name: "Delhi", emoji: "🇮🇳", color: "#FB923C", members: "19K+" },
-  { name: "San Francisco", emoji: "🇺🇸", color: "#14B8A6", members: "12K+" },
-  { name: "London", emoji: "🇬🇧", color: "#38BDF8", members: "22K+" },
-  { name: "New York", emoji: "🇺🇸", color: "#A78BFA", members: "29K+" },
+  { name: "Bangalore", emoji: "🇮🇳", members: "15K+" },
+  { name: "Mumbai", emoji: "🇮🇳", members: "23K+" },
+  { name: "Delhi", emoji: "🇮🇳", members: "19K+" },
+  { name: "San Francisco", emoji: "🇺🇸", members: "12K+" },
+  { name: "London", emoji: "🇬🇧", members: "22K+" },
+  { name: "New York", emoji: "🇺🇸", members: "29K+" },
 ];
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-teal-500/5" />
-        <div className="relative mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 lg:px-8">
-          <nav className="mb-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-lg font-bold text-white">
-                T
-              </div>
-              <span className="text-xl font-bold">Tribe</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/onboarding"
-                className="rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
-              >
-                Get Started
-              </Link>
-            </div>
-          </nav>
+    <div className="relative min-h-screen">
+      {/* Ambient backgrounds */}
+      <div className="glow-blue animate-pulse-slow" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mx-auto max-w-3xl text-center"
-          >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background px-4 py-1.5 text-sm">
-              <Sparkles className="h-4 w-4 text-indigo-500" />
-              <span>Hyperlocal social networking</span>
-            </div>
-            <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Your neighborhood,{" "}
-              <span className="bg-gradient-to-r from-indigo-500 to-teal-500 bg-clip-text text-transparent">
-                your tribe
-              </span>
-            </h1>
-            <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
-              Connect with your local community. Discover events, join tribes,
-              earn karma, and build meaningful connections in your city.
-            </p>
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/onboarding"
-                className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-500/30"
-              >
-                Join Your City
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link
-                href="/home"
-                className="inline-flex items-center gap-2 rounded-full border px-8 py-3.5 text-base font-semibold transition-colors hover:bg-muted"
-              >
-                Explore Demo
-              </Link>
-            </div>
-          </motion.div>
+      {/* Header */}
+      <nav className="fixed top-0 z-50 flex w-full items-center justify-between bg-background/80 px-6 py-4 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-black lowercase tracking-tight">tribe</span>
         </div>
-      </section>
+        <Link
+          href="/onboarding"
+          className="rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95"
+        >
+          Join Your City
+        </Link>
+      </nav>
 
-      {/* Features */}
-      <section className="border-t bg-muted/30 py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold">Everything your community needs</h2>
-            <p className="text-lg text-muted-foreground">
-              From local discovery to community building, Tribe has it all.
-            </p>
-          </div>
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {features.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={item}
-                className="rounded-2xl border bg-background p-6 shadow-tribe-subtle transition-shadow hover:shadow-tribe-small"
-              >
-                <div
-                  className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: `${feature.color}15`, color: feature.color }}
-                >
-                  <feature.icon className="h-6 w-6" />
+      <main className="mx-auto max-w-5xl px-6 pt-32 pb-24">
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-full border bg-white/50 px-4 py-1.5 text-xs font-semibold backdrop-blur-sm"
+        >
+          <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+          Hyperlocal Social Networking
+        </motion.div>
+
+        {/* Hero Title */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-16 text-center"
+        >
+          <h1 className="mb-6 text-5xl font-black tracking-tight sm:text-7xl lg:text-8xl">
+            Your neighborhood,<br />
+            <span className="text-muted-foreground/30">your tribe</span>
+          </h1>
+          <p className="mx-auto max-w-xl text-lg font-medium text-muted-foreground">
+            Connect with your local community. Discover events, join tribes,
+            earn karma, and build meaningful connections in your city.
+          </p>
+        </motion.div>
+
+        {/* Main Interaction Card (Supertoons Style) */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="relative mx-auto mb-32 max-w-2xl"
+        >
+          <div className="absolute -inset-1 rounded-[44px] bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-20 blur-xl" />
+          <div className="super-shadow relative rounded-[40px] border bg-white p-8">
+            <div className="flex flex-col items-center justify-center space-y-8 py-12">
+              <div className="group relative flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-[32px] border-2 border-dashed border-muted-foreground/20 bg-muted/50 transition-all hover:border-primary/40 hover:bg-muted">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-110">
+                    <Plus className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Find your community</h3>
+                    <p className="text-sm text-muted-foreground">Select your city to get started</p>
+                  </div>
                 </div>
-                <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+              </div>
 
-      {/* Cities */}
-      <section className="py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold">Live in 6 cities</h2>
-            <p className="text-lg text-muted-foreground">
-              Growing communities across the globe. Find yours.
-            </p>
-          </div>
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {cities.map((city) => (
-              <motion.div
-                key={city.name}
-                variants={item}
-                className="flex items-center gap-4 rounded-2xl border p-5 transition-shadow hover:shadow-tribe-small"
+              <div className="grid w-full grid-cols-3 gap-3">
+                {cities.slice(0, 3).map((city) => (
+                  <button
+                    key={city.name}
+                    className="flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all hover:bg-muted active:scale-95"
+                  >
+                    <span className="text-2xl">{city.emoji}</span>
+                    <span className="text-xs font-bold">{city.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              <Link
+                href="/onboarding"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-5 text-xl font-black text-primary-foreground shadow-lg transition-all hover:opacity-90 active:scale-95"
               >
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-xl text-2xl"
-                  style={{ backgroundColor: `${city.color}15` }}
-                >
+                Join Tribe <ArrowRight className="h-6 w-6" />
+              </Link>
+            </div>
+
+            {/* Made by badge */}
+            <div className="absolute -bottom-4 right-8 flex items-center gap-2 rounded-full bg-black px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-wider">
+              Made for the community
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Feature Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature, idx) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+              className="super-shadow group rounded-[32px] border bg-white/50 p-8 transition-all hover:bg-white"
+            >
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted transition-transform group-hover:scale-110">
+                <feature.icon className="h-7 w-7" />
+              </div>
+              <h3 className="mb-3 text-xl font-bold">{feature.title}</h3>
+              <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Cities Section */}
+        <section className="mt-32">
+          <div className="mb-12 text-center text-3xl font-black lowercase tracking-tight">
+            live in {cities.length} cities
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {cities.map((city) => (
+              <div
+                key={city.name}
+                className="flex items-center gap-4 rounded-[24px] border border-muted-foreground/10 bg-white/30 p-4 backdrop-blur-sm"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-xl">
                   {city.emoji}
                 </div>
                 <div>
-                  <h3 className="font-semibold">{city.name}</h3>
-                  <p className="text-sm text-muted-foreground">{city.members} members</p>
+                  <h3 className="font-bold">{city.name}</h3>
+                  <p className="text-xs font-semibold text-muted-foreground">{city.members} members</p>
                 </div>
-                <div
-                  className="ml-auto h-3 w-3 rounded-full"
-                  style={{ backgroundColor: city.color }}
-                />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* CTA */}
-      <section className="border-t bg-muted/30 py-24">
-        <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
-          <h2 className="mb-4 text-3xl font-bold">Ready to find your tribe?</h2>
-          <p className="mb-8 text-lg text-muted-foreground">
-            Join thousands of people connecting with their local communities.
-          </p>
+        {/* CTA Footer */}
+        <section className="mt-48 text-center">
+          <h2 className="mb-8 text-4xl font-black tracking-tight sm:text-6xl">
+            Ready to find<br />
+            your tribe?
+          </h2>
           <Link
             href="/onboarding"
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-600"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-12 py-5 text-xl font-black text-primary-foreground shadow-xl transition-all hover:opacity-90 active:scale-95"
           >
-            Get Started Free
-            <ArrowRight className="h-5 w-5" />
+            Get Started Free <ArrowRight className="h-6 w-6" />
           </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Tribe. Building hyperlocal communities.</p>
-        </div>
-      </footer>
+          <div className="mt-12 text-sm font-bold text-muted-foreground uppercase tracking-widest">
+            &copy; 2024 Tribe. building hyperlocal communities.
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
