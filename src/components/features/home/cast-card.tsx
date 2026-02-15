@@ -15,90 +15,101 @@ export function CastCard({ cast }: CastCardProps) {
   const { likeCast, bookmarkCast } = useTribeStore();
 
   return (
-    <div className="border-b bg-background">
+    <div className="bg-white border-b border-muted/30">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        <div className="relative h-10 w-10 overflow-hidden rounded-full">
+      <div className="flex items-center gap-3 px-3 py-3">
+        <div className="relative h-9 w-9 overflow-hidden rounded-full ring-1 ring-muted">
           <Image
             src={cast.user.avatarUrl}
             alt={cast.user.displayName}
             fill
             className="object-cover"
-            sizes="40px"
+            sizes="36px"
           />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold">{cast.user.displayName}</span>
+            <span className="text-[13px] font-bold tracking-tight hover:underline cursor-pointer">{cast.user.username}</span>
             {cast.user.isVerified && (
-              <span className="text-xs text-indigo-500">&#10003;</span>
+              <span className="text-[10px] text-blue-500 font-black">●</span>
             )}
+            <span className="text-[13px] text-muted-foreground">•</span>
+            <span className="text-[13px] text-muted-foreground">{cast.timestamp}</span>
           </div>
-          <p className="text-xs text-muted-foreground">{cast.timestamp}</p>
         </div>
+        <button className="text-muted-foreground hover:text-foreground">
+          <div className="flex gap-0.5">
+            <div className="h-1 w-1 rounded-full bg-current" />
+            <div className="h-1 w-1 rounded-full bg-current" />
+            <div className="h-1 w-1 rounded-full bg-current" />
+          </div>
+        </button>
       </div>
 
-      {/* Image */}
-      <div className="relative aspect-square">
+      {/* Image Container */}
+      <div className="relative aspect-square bg-muted/20">
         <Image
           src={cast.imageUrl}
           alt={cast.caption}
           fill
-          className="object-cover"
+          className="object-cover transition-all hover:scale-[1.02]"
           sizes="(max-width: 768px) 100vw, 600px"
         />
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 px-3 py-2">
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={() => likeCast(cast.id)}
-          className="rounded-full p-2 hover:bg-muted"
-        >
-          <Heart
-            className={cn(
-              "h-6 w-6",
-              cast.isLiked ? "fill-pink-500 text-pink-500" : "text-foreground"
-            )}
-          />
-        </motion.button>
-        <button className="rounded-full p-2 hover:bg-muted">
-          <MessageCircle className="h-6 w-6" />
-        </button>
-        <button className="rounded-full p-2 hover:bg-muted">
-          <Share2 className="h-6 w-6" />
-        </button>
-        <div className="flex-1" />
-        {cast.tipCount > 0 && (
-          <span className="mr-1 flex items-center gap-1 text-xs text-muted-foreground">
-            <Coins className="h-3.5 w-3.5" />
-            {cast.tipCount}
-          </span>
-        )}
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={() => bookmarkCast(cast.id)}
-          className="rounded-full p-2 hover:bg-muted"
-        >
-          <Bookmark
-            className={cn(
-              "h-6 w-6",
-              cast.isSaved ? "fill-amber-500 text-amber-500" : "text-foreground"
-            )}
-          />
-        </motion.button>
+      <div className="flex items-center justify-between px-3 py-3">
+        <div className="flex items-center gap-3">
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={() => likeCast(cast.id)}
+            className="transition-colors hover:opacity-70"
+          >
+            <Heart
+              className={cn(
+                "h-7 w-7",
+                cast.isLiked ? "fill-red-500 text-red-500" : "text-foreground stroke-[2px]"
+              )}
+            />
+          </motion.button>
+          <button className="transition-colors hover:opacity-70">
+            <MessageCircle className="h-7 w-7 stroke-[2px]" />
+          </button>
+          <button className="transition-colors hover:opacity-70">
+            <Share2 className="h-7 w-7 stroke-[2px]" />
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          {cast.tipCount > 0 && (
+            <button className="flex items-center gap-1.5 rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-600 transition-colors hover:bg-yellow-400/20">
+              <Coins className="h-3.5 w-3.5" />
+              Tip {cast.tipCount}
+            </button>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={() => bookmarkCast(cast.id)}
+            className="transition-colors hover:opacity-70"
+          >
+            <Bookmark
+              className={cn(
+                "h-7 w-7 stroke-[2px]",
+                cast.isSaved ? "fill-foreground text-foreground" : "text-foreground"
+              )}
+            />
+          </motion.button>
+        </div>
       </div>
 
-      {/* Likes + Caption */}
-      <div className="px-4 pb-3">
-        <p className="mb-1 text-sm font-semibold">{formatNumber(cast.likes)} likes</p>
-        <p className="text-sm">
-          <span className="font-semibold">{cast.user.username} </span>
-          {cast.caption}
-        </p>
+      {/* Content */}
+      <div className="px-4 pb-4 space-y-1.5">
+        <p className="text-[14px] font-bold tracking-tight">{formatNumber(cast.likes)} likes</p>
+        <div className="text-[14px] leading-snug">
+          <span className="font-bold tracking-tight hover:underline cursor-pointer mr-1.5">{cast.user.username}</span>
+          <span className="font-medium text-foreground/90">{cast.caption}</span>
+        </div>
         {cast.comments.length > 0 && (
-          <button className="mt-1 text-sm text-muted-foreground">
+          <button className="text-[14px] text-muted-foreground hover:text-muted-foreground/80 transition-colors">
             View all {cast.comments.length} comments
           </button>
         )}

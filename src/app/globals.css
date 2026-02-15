@@ -41,6 +41,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground overflow-x-hidden;
   }
@@ -50,7 +51,7 @@
   .bg-glow {
     background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
   }
-  
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -58,16 +59,39 @@
   .animate-pulse-slow {
     animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.1; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
 }
 
 /* Custom shadow to match the soft supertoons feel */
@@ -95,5 +119,7 @@
 }
 
 @keyframes shine {
-  to { background-position: 200% center; }
+  to {
+    background-position: 200% center;
+  }
 }
