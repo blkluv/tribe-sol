@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tribe
+
+Hyperlocal social networking app — connect with your city, join tribes, and engage with your community. Built with Next.js and integrated with Solana for wallet-based identity and the Tapestry social graph protocol.
+
+Ported from the native SwiftUI iOS app to a responsive web experience.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **UI:** React 19, TailwindCSS v4, shadcn/ui, Framer Motion
+- **State:** Zustand
+- **Blockchain:** Solana Web3.js, Wallet Adapter
+- **Social Graph:** Tapestry Protocol (likes, follows, comments, casts)
+- **Theming:** next-themes with city-dynamic accent colors
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file:
 
-## Learn More
+```env
+NEXT_PUBLIC_TAPESTRY_API_URL=<tapestry-api-url>
+NEXT_PUBLIC_SOLANA_RPC_URL=<solana-rpc-url>
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── (app)/              # Authenticated routes (bottom nav + sidebar)
+│   │   ├── home/           # City feed — casts, polls, tasks, crowdfunds, events
+│   │   ├── explore/        # Discover events
+│   │   ├── tribes/         # Tribe listings and detail pages
+│   │   ├── channels/       # Channel detail view
+│   │   ├── chat/           # Tribe chat
+│   │   ├── create/         # Create new cast
+│   │   ├── map/            # City map view
+│   │   ├── notifications/  # Activity notifications
+│   │   ├── profile/        # User profile with Tapestry social counts
+│   │   ├── settings/       # App settings
+│   │   └── wallet/         # SOL balance and wallet management
+│   ├── conference/         # Standalone conference page (no app shell)
+│   └── onboarding/         # Carousel → city selection → wallet connect → signup
+├── components/
+│   ├── tribe/              # 22 reusable Tribe UI components
+│   ├── features/home/      # Feed cards (cast, poll, task, crowdfund, event)
+│   ├── layout/             # App shell, bottom nav, sidebar nav
+│   ├── providers/          # Solana wallet + app providers
+│   └── ui/                 # 15 shadcn/ui base components
+├── hooks/                  # Custom hooks (auth, likes, follows, comments, Tapestry profile)
+├── store/                  # Zustand stores (tribe, auth, ui)
+├── types/                  # TypeScript type definitions
+├── data/                   # Mock data for all features
+└── lib/                    # Utilities, Tapestry client, theme config, icons
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Features
 
-## Deploy on Vercel
+- **City-based feeds** — browse casts, polls, tasks, crowdfunds, and events for your city
+- **Tribes** — join interest-based groups within your city
+- **Solana wallet integration** — connect wallet, view SOL balance, wallet-based identity
+- **Social graph via Tapestry** — on-chain likes, follows, comments, and cast creation
+- **Optimistic UI** — instant feedback on social actions with background sync
+- **Responsive design** — bottom nav on mobile, sidebar on desktop
+- **City-dynamic theming** — accent color changes per selected city
+- **Dark mode** — full dark/light theme support
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
