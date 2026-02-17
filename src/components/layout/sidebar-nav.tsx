@@ -15,6 +15,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WalletButton } from "@/components/tribe/wallet-button";
 
 const mainLinks = [
   { id: "home", label: "Home", icon: Home, href: "/home" },
@@ -107,11 +108,9 @@ export function SidebarNav() {
         </div>
       </nav>
 
-      <div className="p-4 lg:p-6 w-full">
-        <button className="flex w-full items-center gap-4 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:p-3 transition-all active:scale-95">
-          <Settings className="h-7 w-7" />
-          <span className="text-base lg:block hidden font-medium">More</span>
-        </button>
+      {/* Wallet connection indicator */}
+      <div className="p-4 lg:p-6 w-full space-y-3">
+        <WalletButton className="w-full justify-center lg:justify-start" compact={false} />
       </div>
     </aside>
   );
