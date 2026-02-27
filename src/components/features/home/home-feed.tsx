@@ -89,24 +89,24 @@ export function HomeFeed() {
     <div className="pb-24 bg-[#fcfcfc] min-h-screen">
       <AppHeader />
 
-      <div className="px-6 py-6 overflow-hidden">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+      <div className="px-3 sm:px-6 py-4 sm:py-6 overflow-hidden">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-2">
           {tribes.map((tribe) => (
             <button
               key={tribe.id}
-              className="flex items-center gap-3 pl-2 pr-6 py-2 rounded-full bg-white border border-[#f0f0f0] shadow-sm hover:shadow-xl hover:shadow-black/[0.05] transition-all active:scale-95 group shrink-0"
+              className="flex items-center gap-2 sm:gap-3 pl-1.5 sm:pl-2 pr-4 sm:pr-6 py-1.5 sm:py-2 rounded-full bg-white border border-[#f0f0f0] shadow-sm hover:shadow-xl hover:shadow-black/[0.05] transition-all active:scale-95 group shrink-0"
             >
               <div
-                className="h-11 w-11 flex items-center justify-center rounded-full text-xl shadow-inner group-hover:rotate-12 transition-transform"
+                className="h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-full text-lg sm:text-xl shadow-inner group-hover:rotate-12 transition-transform"
                 style={{ backgroundColor: `${tribe.color}15` }}
               >
                 {iconMap[tribe.icon] || tribe.icon}
               </div>
-              <span className="text-[14px] font-black tracking-tight text-black">{tribe.name}</span>
+              <span className="text-[12px] sm:text-[14px] font-black tracking-tight text-black">{tribe.name}</span>
             </button>
           ))}
-          <button className="flex items-center gap-3 pl-2 pr-6 py-2 rounded-full bg-primary/5 text-primary border border-primary/10 shadow-sm shrink-0 font-black text-[14px] hover:bg-primary/10 transition-colors">
-            <div className="h-11 w-11 flex items-center justify-center rounded-full bg-white shadow-sm ring-4 ring-primary/5">
+          <button className="flex items-center gap-2 sm:gap-3 pl-1.5 sm:pl-2 pr-4 sm:pr-6 py-1.5 sm:py-2 rounded-full bg-primary/5 text-primary border border-primary/10 shadow-sm shrink-0 font-black text-[12px] sm:text-[14px] hover:bg-primary/10 transition-colors">
+            <div className="h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center rounded-full bg-white shadow-sm ring-4 ring-primary/5">
               <Plus className="h-5 w-5 stroke-[3px]" />
             </div>
             Discover
@@ -115,8 +115,8 @@ export function HomeFeed() {
       </div>
 
       {/* Single Column Feed Layout */}
-      <div className="px-6 max-w-2xl mx-auto">
-        <div className="flex flex-col gap-6">
+      <div className="px-3 sm:px-6 max-w-2xl mx-auto">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {feedItems.map((item) => (
             <div key={item.key} className="w-full">
               {item.type === "cast" && <CastCard cast={item.data} />}
