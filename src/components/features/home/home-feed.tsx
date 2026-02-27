@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
-import { CityHeader } from "@/components/tribe/city-header";
 import { loadCityData } from "@/lib/city-data";
 import type { City } from "@/types";
 import { CastCard } from "./cast-card";
@@ -37,35 +36,35 @@ export function HomeFeed() {
   }, [switchCity]);
 
   // Build mixed feed: interleave content types
-  const feedItems: { type: string; data: unknown; key: string }[] = [];
+  const feedItems: { type: string; data: any; key: string }[] = [];
 
   // Add casts
   casts.forEach((cast) => {
     feedItems.push({ type: "cast", data: cast, key: cast.id });
   });
 
-  // Insert events after every 3rd cast
+  // Insert events after every 2nd item
   events.forEach((event, i) => {
-    const insertAt = Math.min((i + 1) * 3, feedItems.length);
-    feedItems.splice(insertAt + i, 0, { type: "event", data: event, key: event.id });
+    const insertAt = Math.min((i + 1) * 2, feedItems.length);
+    feedItems.splice(insertAt, 0, { type: "event", data: event, key: event.id });
   });
 
   // Insert polls
   polls.forEach((poll, i) => {
-    const insertAt = Math.min((i + 1) * 4 + 1, feedItems.length);
-    feedItems.splice(insertAt + i, 0, { type: "poll", data: poll, key: poll.id });
+    const insertAt = Math.min((i + 1) * 3 + 1, feedItems.length);
+    feedItems.splice(insertAt, 0, { type: "poll", data: poll, key: poll.id });
   });
 
   // Insert tasks
   tasks.forEach((task, i) => {
-    const insertAt = Math.min((i + 1) * 5 + 2, feedItems.length);
-    feedItems.splice(insertAt + i, 0, { type: "task", data: task, key: task.id });
+    const insertAt = Math.min((i + 1) * 4 + 2, feedItems.length);
+    feedItems.splice(insertAt, 0, { type: "task", data: task, key: task.id });
   });
 
   // Insert crowdfunds
   crowdfunds.forEach((cf, i) => {
-    const insertAt = Math.min((i + 1) * 6 + 3, feedItems.length);
-    feedItems.splice(insertAt + i, 0, { type: "crowdfund", data: cf, key: cf.id });
+    const insertAt = Math.min((i + 1) * 5 + 3, feedItems.length);
+    feedItems.splice(insertAt, 0, { type: "crowdfund", data: cf, key: cf.id });
   });
 
   if (!currentCity) {
@@ -77,75 +76,63 @@ export function HomeFeed() {
   }
 
   return (
-    <div className="pb-20">
-      {/* City Header */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-2 py-2 backdrop-blur-md">
-        <CityHeader
-          city={currentCity}
-          cities={allCities}
-          onCityChange={handleCityChange}
-        />
+    <div className="pb-24 bg-[#fcfcfc] min-h-screen">
+      {/* Search & Header (Unique Convos Style) */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black text-white text-lg font-black tracking-tighter shadow-xl shadow-black/10">
+            {currentCity.name.charAt(0)}
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">{currentCity.name}</h1>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Local Pulse</p>
+          </div>
+        </div>
+        <button
+          onClick={() => {/* Open city switcher */ }}
+          className="rounded-full bg-muted/50 px-4 py-2 text-xs font-bold hover:bg-muted transition-colors"
+        >
+          Switch City
+        </button>
       </div>
 
-      {/* City switching overlay */}
-      {isSwitchingCity && (
-        <div className="flex h-32 items-center justify-center">
-          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-        </div>
-      )}
-
-      {/* Stories / Tribes Bar */}
-      <div className="border-b bg-background overflow-hidden py-4">
-        <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
+      {/* Tribe Pulse Bar (Alternative to Stories) */}
+      <div className="px-6 py-6 overflow-hidden">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
           {tribes.map((tribe) => (
-            <button key={tribe.id} className="flex flex-col items-center gap-1.5 flex-none group">
-              <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 transition-transform active:scale-90 group-hover:scale-105">
-                <div className="h-16 w-16 rounded-full border-2 border-background bg-muted overflow-hidden relative">
-                  {tribe.imageUrl ? (
-                    <Image src={tribe.imageUrl} alt={tribe.name} fill className="object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-xl" style={{ backgroundColor: `${tribe.color}30`, color: tribe.color }}>
-                      {tribe.icon}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <span className="text-[11px] font-medium tracking-tight truncate w-16 text-center">{tribe.name}</span>
+            <button
+              key={tribe.id}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-[#f0f0f0] shadow-sm hover:shadow-md transition-all active:scale-95 group shrink-0"
+            >
+              <span className="text-lg group-hover:scale-125 transition-transform">{tribe.icon}</span>
+              <span className="text-[13px] font-bold tracking-tight">{tribe.name}</span>
             </button>
           ))}
-          <button className="flex flex-col items-center gap-1.5 flex-none transition-opacity hover:opacity-70">
-            <div className="h-[68px] w-[68px] rounded-full border border-dashed border-muted-foreground/30 flex items-center justify-center text-muted-foreground">
-              <Plus className="h-6 w-6" />
-            </div>
-            <span className="text-[11px] font-medium tracking-tight text-muted-foreground">Discover</span>
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/5 text-primary border border-primary/10 shadow-sm shrink-0 font-bold text-[13px]">
+            <Plus className="h-4 w-4" /> Discover
           </button>
         </div>
       </div>
 
-      {/* Feed Content */}
-      <div className="space-y-1">
-        {feedItems.map((item) => {
-          switch (item.type) {
-            case "cast":
-              return <CastCard key={item.key} cast={item.data as import("@/types").Cast} />;
-            case "event":
-              return <EventCard key={item.key} event={item.data as import("@/types").ExploreItem} />;
-            case "poll":
-              return <PollCard key={item.key} poll={item.data as import("@/types").Poll} />;
-            case "task":
-              return <TaskCard key={item.key} task={item.data as import("@/types").Task} />;
-            case "crowdfund":
-              return <CrowdfundCard key={item.key} crowdfund={item.data as import("@/types").Crowdfund} />;
-            default:
-              return null;
-          }
-        })}
+      {/* Single Column Feed Layout */}
+      <div className="px-6 max-w-2xl mx-auto">
+        <div className="flex flex-col gap-6">
+          {feedItems.map((item) => (
+            <div key={item.key} className="w-full">
+              {item.type === "cast" && <CastCard cast={item.data} />}
+              {item.type === "event" && <EventCard event={item.data} />}
+              {item.type === "poll" && <PollCard poll={item.data} />}
+              {item.type === "task" && <TaskCard task={item.data} />}
+              {item.type === "crowdfund" && <CrowdfundCard crowdfund={item.data} />}
+            </div>
+          ))}
+        </div>
       </div>
 
       {feedItems.length === 0 && (
         <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
-          <p className="font-bold">No posts in {currentCity.name} yet</p>
-          <p className="text-sm">Be the first to share something!</p>
+          <p className="text-xl font-bold tracking-tight">Quiet neighborhood...</p>
+          <p className="text-sm font-medium">Be the first to share something in {currentCity.name}!</p>
         </div>
       )}
     </div>

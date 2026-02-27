@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, Heart, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Crowdfund } from "@/types";
 import { formatNumber } from "@/lib/utils";
@@ -14,54 +14,63 @@ export function CrowdfundCard({ crowdfund }: CrowdfundCardProps) {
   const progress = Math.min((crowdfund.raised / crowdfund.goal) * 100, 100);
 
   return (
-    <div className="border-b bg-background px-4 py-4">
-      <div className="overflow-hidden rounded-2xl border">
-        {crowdfund.imageUrl && (
-          <div className="relative aspect-video">
-            <Image
-              src={crowdfund.imageUrl}
-              alt={crowdfund.title}
-              fill
-              className="object-cover"
-              sizes="600px"
-            />
-          </div>
-        )}
-        <div className="p-4">
-          <div className="mb-2 flex items-center gap-3">
-            <div className="relative h-8 w-8 overflow-hidden rounded-full">
-              <Image src={crowdfund.user.avatarUrl} alt="" fill className="object-cover" sizes="32px" />
-            </div>
-            <span className="text-xs text-muted-foreground">{crowdfund.user.displayName}</span>
-          </div>
-          <h3 className="mb-1 text-base font-semibold">{crowdfund.title}</h3>
-          <p className="mb-3 text-sm text-muted-foreground line-clamp-2">
-            {crowdfund.description}
-          </p>
+    <div className="group bg-white rounded-[32px] border border-[#f0f0f0] p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-black/[0.03]">
+      {/* Header Info */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2 text-rose-500 font-bold">
+          <Heart className="h-4 w-4" />
+          <span className="text-[11px] uppercase tracking-widest">Local Cause</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-500 uppercase tracking-widest">
+          {Math.round(progress)}% Funded
+        </div>
+      </div>
 
-          <div className="mb-2">
-            <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="font-semibold text-green-600">
-                ₹{formatNumber(crowdfund.raised)}
-              </span>
-              <span className="text-muted-foreground">
-                of ₹{formatNumber(crowdfund.goal)}
-              </span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
+      {/* Title */}
+      <h3 className="text-xl font-bold tracking-tight mb-3">
+        {crowdfund.title}
+      </h3>
+      <p className="text-[14px] font-medium text-[#666] leading-relaxed mb-6 line-clamp-2">
+        {crowdfund.description}
+      </p>
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {crowdfund.contributors} contributors
+      {/* Progress Section */}
+      <div className="mb-6 p-5 rounded-[24px] bg-[#fcfcfc] border border-[#f0f0f0]">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg font-black tracking-tight text-black">
+              {formatNumber(crowdfund.raised)} SOL
             </span>
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {crowdfund.location}
-            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[#999] text-xs font-bold">
+            <Target className="h-4 w-4" />
+            GOAL: {formatNumber(crowdfund.goal)} SOL
           </div>
         </div>
+        <Progress value={progress} className="h-2.5 bg-black/5" />
+      </div>
+
+      {/* Visual */}
+      {crowdfund.imageUrl && (
+        <div className="relative aspect-[16/10] rounded-[24px] overflow-hidden bg-[#f5f5f5] mb-6">
+          <Image
+            src={crowdfund.imageUrl}
+            alt={crowdfund.title}
+            fill
+            className="object-cover transition-transform group-hover:scale-105 duration-700"
+          />
+        </div>
+      )}
+
+      {/* Footer Info */}
+      <div className="flex items-center justify-between border-t border-[#f0f0f0] pt-6">
+        <div className="flex items-center gap-2 text-[11px] font-bold text-[#999] uppercase tracking-widest">
+          <Users className="h-4 w-4" />
+          {crowdfund.contributors} Backers
+        </div>
+        <button className="px-6 py-3 rounded-full bg-rose-500 text-white font-bold text-[13px] hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-rose-500/20">
+          Fund Cause
+        </button>
       </div>
     </div>
   );
