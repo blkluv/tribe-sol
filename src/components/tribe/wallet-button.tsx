@@ -23,16 +23,16 @@ export function WalletButton({ className, compact }: WalletButtonProps) {
       <button
         onClick={logout}
         className={cn(
-          "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-muted",
+          "flex items-center gap-3 rounded-[20px] bg-muted/60 px-5 py-3 text-sm transition-all hover:bg-muted active:scale-95",
           className
         )}
       >
         <div className="relative">
-          <Wallet className="h-4 w-4" />
-          <div className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-green-500" />
+          <Wallet className="h-5 w-5 text-black" />
+          <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500" />
         </div>
         {!compact && (
-          <span className="font-mono text-xs">{displayAddress}</span>
+          <span className="font-bold text-black tracking-tight">{displayAddress}</span>
         )}
       </button>
     );
@@ -42,12 +42,12 @@ export function WalletButton({ className, compact }: WalletButtonProps) {
     <button
       onClick={() => setVisible(true)}
       className={cn(
-        "flex items-center gap-2 rounded-xl bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90",
+        "flex items-center gap-3 rounded-[20px] bg-primary px-5 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 shadow-sm shadow-primary/20",
         className
       )}
     >
-      <Wallet className="h-4 w-4" />
-      {!compact && <span>Connect</span>}
+      <Wallet className="h-5 w-5" />
+      {!compact && <span>Connect Wallet</span>}
     </button>
   );
 }
