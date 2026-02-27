@@ -27,6 +27,9 @@ interface TapestryContentItem {
     bio?: string | null;
     image?: string | null;
   };
+  requestingProfileSocialInfo?: {
+    hasLiked?: boolean;
+  };
 }
 
 /**
@@ -49,7 +52,7 @@ export function useTapestryPosts(profileId: string | null | undefined) {
 
     try {
       const res = await fetch(
-        `/api/content?profileId=${encodeURIComponent(profileId)}`
+        `/api/content?profileId=${encodeURIComponent(profileId)}&requestingProfileId=${encodeURIComponent(profileId)}`
       );
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
@@ -78,7 +81,7 @@ export function useTapestryPosts(profileId: string | null | undefined) {
           likes: item.socialCounts?.likeCount || 0,
           comments: [],
           timestamp: formatTimeAgo(c.created_at),
-          isLiked: false,
+          isLiked: item.requestingProfileSocialInfo?.hasLiked ?? false,
           isSaved: false,
           tipCount: 0,
           totalTips: 0,
