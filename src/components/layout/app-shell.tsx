@@ -1,12 +1,14 @@
 "use client";
 
 import { useTribeStore } from "@/store/use-tribe-store";
+import { useUIStore } from "@/store/use-ui-store";
 import { BottomNav } from "./bottom-nav";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const isSwitchingCity = useTribeStore((s) => s.isSwitchingCity);
+  const toastMessage = useUIStore((s) => s.toastMessage);
 
   return (
     <div className="flex min-h-screen bg-white relative">
@@ -40,6 +42,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <BottomNav />
+
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black px-6 py-3 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
