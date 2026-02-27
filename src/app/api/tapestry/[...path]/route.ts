@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const TAPESTRY_BASE_URL =
-  process.env.TAPESTRY_BASE_URL || "https://api.dev.usetapestry.dev/v1";
+  process.env.TAPESTRY_BASE_URL || "https://api.usetapestry.dev/v1";
 const TAPESTRY_API_KEY = process.env.TAPESTRY_API_KEY || "";
 
 async function handler(
@@ -9,11 +9,11 @@ async function handler(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
-  const url = `${TAPESTRY_BASE_URL}/${path.join("/")}${req.nextUrl.search}`;
+  const separator = req.nextUrl.search ? "&" : "?";
+  const url = `${TAPESTRY_BASE_URL}/${path.join("/")}${req.nextUrl.search}${separator}apiKey=${TAPESTRY_API_KEY}`;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-api-key": TAPESTRY_API_KEY,
   };
 
   const body =

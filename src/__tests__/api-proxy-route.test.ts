@@ -73,19 +73,37 @@ describe("Tapestry API Proxy Route", () => {
     });
   });
 
-  describe("Header Injection", () => {
-    it("should include x-api-key header", () => {
+  describe("API Key as Query Parameter", () => {
+    it("should append apiKey as query parameter when no existing search", () => {
+      const path = ["profiles", "findOrCreate"];
+      const search = "";
+      const separator = search ? "&" : "?";
+      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}${search}${separator}apiKey=${TAPESTRY_API_KEY}`;
+      expect(url).toBe(
+        "https://api.test.tapestry.dev/v1/profiles/findOrCreate?apiKey=test-api-key-123"
+      );
+    });
+
+    it("should append apiKey with & when query string already exists", () => {
+      const path = ["profiles", "followers", "user1"];
+      const search = "?page=1&pageSize=20";
+      const separator = search ? "&" : "?";
+      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}${search}${separator}apiKey=${TAPESTRY_API_KEY}`;
+      expect(url).toBe(
+        "https://api.test.tapestry.dev/v1/profiles/followers/user1?page=1&pageSize=20&apiKey=test-api-key-123"
+      );
+    });
+
+    it("should NOT include x-api-key header", () => {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-api-key": TAPESTRY_API_KEY,
       };
-      expect(headers["x-api-key"]).toBe("test-api-key-123");
+      expect(headers).not.toHaveProperty("x-api-key");
     });
 
     it("should always set Content-Type to application/json", () => {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-api-key": TAPESTRY_API_KEY,
       };
       expect(headers["Content-Type"]).toBe("application/json");
     });
@@ -172,7 +190,7 @@ describe("Tapestry API Proxy Route", () => {
   });
 
   describe("Upstream fetch call", () => {
-    it("should call fetch with correct URL, method, headers, and body for POST", async () => {
+    it("should call fetch with apiKey in URL and Content-Type header for POST", async () => {
       mockFetch.mockResolvedValue({
         text: () => Promise.resolve('{"id":"profile1"}'),
         status: 200,
@@ -180,10 +198,9 @@ describe("Tapestry API Proxy Route", () => {
       });
 
       const path = ["profiles", "findOrCreate"];
-      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}`;
+      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}?apiKey=${TAPESTRY_API_KEY}`;
       const headers = {
         "Content-Type": "application/json",
-        "x-api-key": TAPESTRY_API_KEY,
       };
       const body = '{"walletAddress":"abc"}';
 
@@ -204,10 +221,9 @@ describe("Tapestry API Proxy Route", () => {
       });
 
       const path = ["profiles", "user1"];
-      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}`;
+      const url = `${TAPESTRY_BASE_URL}/${path.join("/")}?apiKey=${TAPESTRY_API_KEY}`;
       const headers = {
         "Content-Type": "application/json",
-        "x-api-key": TAPESTRY_API_KEY,
       };
 
       await fetch(url, { method: "GET", headers, body: undefined });
