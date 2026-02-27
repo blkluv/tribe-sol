@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
 import { cn, formatNumber } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { useShare } from "@/hooks/use-share";
+import * as tapestry from "@/lib/tapestry";
 
 const tabs = ["Activity", "Badges", "Stats"];
 
@@ -54,9 +56,15 @@ function ActivityGrid() {
 }
 
 export default function ProfilePage() {
-  const { currentUser } = useTribeStore();
+  const { currentUser, updateCurrentUser } = useTribeStore();
   const { isAuthenticated, profile: tapestryProfile, walletAddress } = useAuth();
+  const { share, showToast } = useShare();
   const [activeTab, setActiveTab] = useState("Activity");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!currentUser) {
     return (
@@ -155,10 +163,95 @@ export default function ProfilePage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mb-8">
-          <button className="flex-1 rounded-lg bg-muted/50 py-2 text-[14px] font-bold hover:bg-muted transition-colors">Edit Profile</button>
-          <button className="flex-1 rounded-lg bg-muted/50 py-2 text-[14px] font-bold hover:bg-muted transition-colors">Share Profile</button>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => {
+              if (isEditing) {
+                setIsEditing(false);
+              } else {
+                setEditName(currentUser.displayName);
+                setEditBio(currentUser.bio || "");
+                setEditLocation(currentUser.location || "");
+                setIsEditing(true);
+              }
+            }}
+            className={cn(
+              "flex-1 rounded-lg py-2 text-[14px] font-bold transition-colors",
+              isEditing ? "bg-muted text-muted-foreground" : "bg-muted/50 hover:bg-muted"
+            )}
+          >
+            {isEditing ? "Cancel" : "Edit Profile"}
+          </button>
+          <button
+            onClick={() => share(
+              displayName || currentUser.username,
+              displayBio || "",
+              `${typeof window !== "undefined" ? window.location.origin : ""}/profile`
+            )}
+            className="flex-1 rounded-lg bg-muted/50 py-2 text-[14px] font-bold hover:bg-muted transition-colors"
+          >
+            Share Profile
+          </button>
         </div>
+
+        {/* Edit Form */}
+        {isEditing && (
+          <div className="mb-8 space-y-3 rounded-2xl border bg-muted/10 p-4">
+            <div>
+              <label className="mb-1 block text-xs font-bold text-muted-foreground">Display Name</label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold text-muted-foreground">Bio</label>
+              <textarea
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                rows={3}
+                className="w-full resize-none rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold text-muted-foreground">Location</label>
+              <input
+                type="text"
+                value={editLocation}
+                onChange={(e) => setEditLocation(e.target.value)}
+                className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              disabled={isSaving || !editName.trim()}
+              onClick={async () => {
+                setIsSaving(true);
+                updateCurrentUser({
+                  displayName: editName.trim(),
+                  bio: editBio.trim(),
+                  location: editLocation.trim(),
+                });
+                if (isAuthenticated && tapestryProfile?.id) {
+                  try {
+                    await tapestry.updateProfile(tapestryProfile.id, {
+                      username: editName.trim(),
+                      bio: editBio.trim(),
+                    });
+                  } catch {
+                    // Non-fatal
+                  }
+                }
+                setIsSaving(false);
+                setIsEditing(false);
+              }}
+              className="w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95 disabled:opacity-40"
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        )}
 
         {/* Karma Progress Card */}
         {karma && levelConfig && (
@@ -256,6 +349,12 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {showToast && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg animate-in fade-in slide-in-from-bottom-4">
+          Link copied!
+        </div>
+      )}
     </div>
   );
 }

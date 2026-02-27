@@ -66,6 +66,9 @@ interface TribeStore {
   // Event actions
   addEvent: (event: ExploreItem) => void;
 
+  // User actions
+  updateCurrentUser: (updates: Partial<User>) => void;
+
   // Tapestry bridge
   setTapestryProfileId: (id: string | null) => void;
 }
@@ -133,6 +136,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
           user: cast.user.displayName,
           avatar: cast.user.avatarUrl,
           message: `Your post "${cast.caption.slice(0, 40)}..." got a new like`,
+          href: "/home",
         });
       }
     }
@@ -192,6 +196,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
         user: cast.user.displayName,
         avatar: cast.user.avatarUrl,
         message: `received a ${amount} SOL tip on "${cast.caption.slice(0, 30)}..."`,
+        href: "/wallet",
       });
     }
   },
@@ -252,6 +257,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
         user: tribe.name,
         avatar: tribe.imageUrl || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=100&h=100&fit=crop",
         message: `You joined ${tribe.name}`,
+        href: `/tribes/${tribeId}`,
       });
     }
   },
@@ -268,6 +274,11 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
 
   addEvent: (event) =>
     set((state) => ({ events: [event, ...state.events] })),
+
+  updateCurrentUser: (updates) =>
+    set((state) => ({
+      currentUser: state.currentUser ? { ...state.currentUser, ...updates } : null,
+    })),
 
   setTapestryProfileId: (id) => set({ tapestryProfileId: id }),
 }));
