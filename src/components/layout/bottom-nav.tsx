@@ -30,7 +30,7 @@ export function BottomNav() {
 
   return (
     <div className="fixed bottom-4 sm:bottom-8 left-0 right-0 z-50 flex justify-center px-3 sm:px-6">
-      <nav className="flex items-center gap-0.5 sm:gap-1.5 rounded-[32px] bg-black px-2 sm:px-3 py-2 sm:py-2.5 shadow-2xl shadow-black/20 ring-1 ring-white/10">
+      <nav className="flex items-center gap-1 sm:gap-3 rounded-[32px] bg-black px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xl shadow-black/20 ring-1 ring-white/10">
         {/* Left Tabs */}
         {leftTabs.map((tab) => {
           const isActive = pathname.startsWith(tab.href);
@@ -40,7 +40,7 @@ export function BottomNav() {
               key={tab.id}
               href={tab.href}
               className={cn(
-                "flex flex-col items-center justify-center rounded-2xl px-2.5 sm:px-4 py-2 sm:py-2.5 transition-all active:scale-90",
+                "flex flex-col items-center justify-center rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all active:scale-90",
                 isActive ? "bg-white text-black" : "text-white/60 hover:text-white"
               )}
             >
@@ -71,7 +71,7 @@ export function BottomNav() {
               key={tab.id}
               href={tab.href}
               className={cn(
-                "flex flex-col items-center justify-center rounded-2xl px-2.5 sm:px-4 py-2 sm:py-2.5 transition-all active:scale-90",
+                "flex flex-col items-center justify-center rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all active:scale-90",
                 isActive ? "bg-white text-black" : "text-white/60 hover:text-white"
               )}
             >
