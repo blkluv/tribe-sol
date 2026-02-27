@@ -35,20 +35,17 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:w-60 lg:w-64 flex-col border-r bg-background h-screen sticky top-0">
-      <div className="flex h-14 items-center px-4 border-b">
+    <aside className="hidden h-screen flex-col border-r bg-background sticky top-0 md:flex md:w-20 lg:w-64">
+      <div className="flex px-3 py-10 lg:px-6">
         <Link href="/home" className="flex items-center gap-2">
-          <div
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-            style={{ backgroundColor: "var(--tribe-primary)" }}
-          >
-            T
+          <span className="text-2xl font-black lowercase tracking-tighter lg:block hidden">tribe</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white font-black text-sm lg:hidden">
+            t
           </div>
-          <span className="text-lg font-bold">Tribe</span>
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 space-y-2 px-3">
         {mainLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           const Icon = link.icon;
@@ -57,30 +54,32 @@ export function SidebarNav() {
               key={link.id}
               href={link.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "group flex items-center gap-4 rounded-xl px-3 py-3 transition-all active:scale-95",
                 isActive
-                  ? "bg-[var(--tribe-primary)]/10 text-[var(--tribe-primary)]"
+                  ? "font-bold text-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
-              {link.label}
+              <Icon
+                className={cn(
+                  "h-7 w-7 transition-transform group-hover:scale-110",
+                  isActive && "stroke-[3px]"
+                )}
+              />
+              <span className="text-base lg:block hidden tracking-tight">{link.label}</span>
             </Link>
           );
         })}
 
-        <div className="py-2">
-          <Link
-            href="/create"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white transition-colors"
-            style={{ backgroundColor: "var(--tribe-primary)" }}
-          >
-            <PlusCircle className="h-5 w-5" />
-            Create
-          </Link>
-        </div>
+        <Link
+          href="/create"
+          className="group flex items-center gap-4 rounded-xl px-3 py-3 text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
+        >
+          <PlusCircle className="h-7 w-7 transition-transform group-hover:scale-110" />
+          <span className="text-base lg:block hidden tracking-tight">Create</span>
+        </Link>
 
-        <div className="border-t pt-3 mt-3 space-y-1">
+        <div className="pt-4 mt-4 border-t space-y-2">
           {secondaryLinks.map((link) => {
             const isActive = pathname.startsWith(link.href);
             const Icon = link.icon;
@@ -89,19 +88,31 @@ export function SidebarNav() {
                 key={link.id}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group flex items-center gap-4 rounded-xl px-3 py-3 transition-all active:scale-95",
                   isActive
-                    ? "bg-[var(--tribe-primary)]/10 text-[var(--tribe-primary)]"
+                    ? "font-bold text-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" />
-                {link.label}
+                <Icon
+                  className={cn(
+                    "h-7 w-7 transition-transform group-hover:scale-110",
+                    isActive && "stroke-[3px]"
+                  )}
+                />
+                <span className="text-base lg:block hidden tracking-tight">{link.label}</span>
               </Link>
             );
           })}
         </div>
       </nav>
+
+      <div className="p-4 lg:p-6 w-full">
+        <button className="flex w-full items-center gap-4 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:p-3 transition-all active:scale-95">
+          <Settings className="h-7 w-7" />
+          <span className="text-base lg:block hidden font-medium">More</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { Plus, Heart, MessageCircle, Share2, Bookmark, Coins } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { CastCard } from "./cast-card";
 import { PollCard } from "./poll-card";
@@ -8,7 +10,7 @@ import { TaskCard } from "./task-card";
 import { CrowdfundCard } from "./crowdfund-card";
 
 export function HomeFeed() {
-  const { casts, polls, events, tasks, crowdfunds, currentCity } = useTribeStore();
+  const { casts, polls, events, tasks, crowdfunds, currentCity, tribes } = useTribeStore();
 
   // Build mixed feed: interleave content types
   const feedItems: { type: string; data: unknown; key: string }[] = [];
@@ -45,27 +47,52 @@ export function HomeFeed() {
   if (!currentCity) {
     return (
       <div className="flex h-64 items-center justify-center text-muted-foreground">
-        Loading...
+        <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="pb-20">
       {/* City Header */}
-      <div
-        className="sticky top-0 z-40 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-lg"
-      >
-        <div
-          className="h-3 w-3 rounded-full"
-          style={{ backgroundColor: currentCity.accentColor }}
-        />
-        <h1 className="text-lg font-bold">{currentCity.name}</h1>
-        <span className="text-sm text-muted-foreground">{currentCity.country}</span>
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-white/95 px-4 py-3 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: currentCity.accentColor }} />
+          <h1 className="text-xl font-black tracking-tight">{currentCity.name}</h1>
+        </div>
+        <button className="text-xs font-black uppercase tracking-widest text-muted-foreground">Switch</button>
       </div>
 
-      {/* Feed */}
-      <div>
+      {/* Stories / Tribes Bar */}
+      <div className="border-b bg-white overflow-hidden py-4">
+        <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
+          {tribes.map((tribe) => (
+            <button key={tribe.id} className="flex flex-col items-center gap-1.5 flex-none group">
+              <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 transition-transform active:scale-90 group-hover:scale-105">
+                <div className="h-16 w-16 rounded-full border-2 border-white bg-muted overflow-hidden relative">
+                  {tribe.imageUrl ? (
+                    <Image src={tribe.imageUrl} alt={tribe.name} fill className="object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-xl" style={{ backgroundColor: `${tribe.color}30`, color: tribe.color }}>
+                      {tribe.icon}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className="text-[11px] font-medium tracking-tight truncate w-16 text-center">{tribe.name}</span>
+            </button>
+          ))}
+          <button className="flex flex-col items-center gap-1.5 flex-none transition-opacity hover:opacity-70">
+            <div className="h-[68px] w-[68px] rounded-full border border-dashed border-muted-foreground/30 flex items-center justify-center text-muted-foreground">
+              <Plus className="h-6 w-6" />
+            </div>
+            <span className="text-[11px] font-medium tracking-tight text-muted-foreground">Discover</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Feed Content */}
+      <div className="space-y-1">
         {feedItems.map((item) => {
           switch (item.type) {
             case "cast":
@@ -86,8 +113,8 @@ export function HomeFeed() {
 
       {feedItems.length === 0 && (
         <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
-          <p>No content yet in {currentCity.name}</p>
-          <p className="text-sm">Be the first to post!</p>
+          <p className="font-bold">No posts in {currentCity.name} yet</p>
+          <p className="text-sm">Be the first to share something!</p>
         </div>
       )}
     </div>
