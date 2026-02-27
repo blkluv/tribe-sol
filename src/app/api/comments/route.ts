@@ -5,10 +5,22 @@ const apiKey = process.env.TAPESTRY_API_KEY || "";
 
 export async function GET(req: NextRequest) {
   const contentId = req.nextUrl.searchParams.get("contentId") || undefined;
+  const commentId = req.nextUrl.searchParams.get("commentId") || undefined;
   const page = req.nextUrl.searchParams.get("page") || undefined;
   const pageSize = req.nextUrl.searchParams.get("pageSize") || undefined;
 
   try {
+    // If commentId is provided, fetch replies to that comment
+    if (commentId) {
+      const data = await socialfi.comments.repliesList({
+        apiKey,
+        id: commentId,
+        page,
+        pageSize,
+      });
+      return NextResponse.json(data);
+    }
+
     const data = await socialfi.comments.commentsList({
       apiKey,
       contentId,
