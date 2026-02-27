@@ -3,8 +3,9 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Users, Lock, Shield, Hash } from "lucide-react";
+import { ArrowLeft, Users, Lock, Shield, Hash, Share2 } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
+import { useShare } from "@/hooks/use-share";
 import { formatNumber } from "@/lib/utils";
 
 const tabs = ["Feed", "Events", "Members", "About"];
@@ -13,6 +14,7 @@ export default function TribeDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params);
   const router = useRouter();
   const { tribes, joinTribe, leaveTribe, casts } = useTribeStore();
+  const { share, showToast } = useShare();
   const [activeTab, setActiveTab] = useState("Feed");
 
   const tribe = tribes.find((t) => t.id === id);
@@ -35,6 +37,16 @@ export default function TribeDetailPage({ params }: { params: Promise<{ id: stri
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="flex-1 truncate text-lg font-bold">{tribe.name}</h1>
+        <button
+          onClick={() => share(
+            tribe.name,
+            tribe.description,
+            `${typeof window !== "undefined" ? window.location.origin : ""}/tribes/${id}`
+          )}
+          className="rounded-full p-2 hover:bg-muted"
+        >
+          <Share2 className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Hero */}
@@ -144,6 +156,12 @@ export default function TribeDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
       </div>
+
+      {showToast && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg animate-in fade-in slide-in-from-bottom-4">
+          Link copied!
+        </div>
+      )}
     </div>
   );
 }
