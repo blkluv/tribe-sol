@@ -29,6 +29,7 @@
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "socialfi": "^0.1.14",
     "tailwind-merge": "^3.4.1",
     "zustand": "^5.0.11"
   },
