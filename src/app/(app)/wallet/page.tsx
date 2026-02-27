@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   Wallet,
   ArrowUpRight,
@@ -15,32 +14,30 @@ import {
   Coins,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useTip } from "@/hooks/use-tip";
+import { getTipHistory } from "@/hooks/use-tip";
 
 export default function WalletPage() {
   const { connection } = useConnection();
-  const { publicKey } = useWallet();
-  const { setVisible } = useWalletModal();
-  const { isConnected, walletAddress, isAuthenticated, profile, logout } = useAuth();
-  const { getTipHistory } = useTip();
+  const { isConnected, walletAddress, isAuthenticated, profile, login, logout } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Fetch real SOL balance
   useEffect(() => {
-    if (!publicKey) {
+    if (!walletAddress) {
       setBalance(null);
       return;
     }
 
     setIsLoadingBalance(true);
+    const publicKey = new PublicKey(walletAddress);
     connection
       .getBalance(publicKey)
       .then((lamports) => setBalance(lamports / LAMPORTS_PER_SOL))
       .catch(() => setBalance(null))
       .finally(() => setIsLoadingBalance(false));
-  }, [publicKey, connection]);
+  }, [walletAddress, connection]);
 
   const handleCopy = () => {
     if (walletAddress) {
@@ -71,7 +68,7 @@ export default function WalletPage() {
             blockchain.
           </p>
           <button
-            onClick={() => setVisible(true)}
+            onClick={login}
             className="flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background"
           >
             <Wallet className="h-4 w-4" />
@@ -117,7 +114,7 @@ export default function WalletPage() {
               Wallet Address
             </span>
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-600">
-              Devnet
+              Mainnet
             </span>
           </div>
 

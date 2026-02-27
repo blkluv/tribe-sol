@@ -1,6 +1,5 @@
 "use client";
 
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Wallet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -11,8 +10,7 @@ interface WalletButtonProps {
 }
 
 export function WalletButton({ className, compact }: WalletButtonProps) {
-  const { setVisible } = useWalletModal();
-  const { isConnected, walletAddress, logout } = useAuth();
+  const { isConnected, walletAddress, login, logout } = useAuth();
 
   const displayAddress = walletAddress
     ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
@@ -40,7 +38,7 @@ export function WalletButton({ className, compact }: WalletButtonProps) {
 
   return (
     <button
-      onClick={() => setVisible(true)}
+      onClick={login}
       className={cn(
         "flex items-center gap-3 rounded-[20px] bg-primary px-5 py-3 text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-95 shadow-sm shadow-primary/20",
         className

@@ -2,17 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { motion } from "framer-motion";
 import { Wallet, ArrowRight, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function ConnectWalletPage() {
   const router = useRouter();
-  const { connected } = useWallet();
-  const { setVisible } = useWalletModal();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isConnected, login } = useAuth();
 
   // Auto-redirect if already authenticated
   useEffect(() => {
@@ -23,10 +19,10 @@ export default function ConnectWalletPage() {
 
   // Auto-redirect to city selection when wallet connects
   useEffect(() => {
-    if (connected && !isAuthenticated) {
+    if (isConnected && !isAuthenticated) {
       router.push("/onboarding/city");
     }
-  }, [connected, isAuthenticated, router]);
+  }, [isConnected, isAuthenticated, router]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
@@ -46,7 +42,7 @@ export default function ConnectWalletPage() {
         </p>
 
         <button
-          onClick={() => setVisible(true)}
+          onClick={login}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-base font-semibold text-background transition-opacity hover:opacity-90"
         >
           Connect Wallet
