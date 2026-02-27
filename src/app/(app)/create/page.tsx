@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   PenSquare,
   Calendar,
@@ -79,6 +80,8 @@ export default function CreatePage() {
 
   // Cast state
   const [caption, setCaption] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Poll state
   const [pollQuestion, setPollQuestion] = useState("");
@@ -106,6 +109,13 @@ export default function CreatePage() {
   const [channelName, setChannelName] = useState("");
   const [channelDesc, setChannelDesc] = useState("");
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setSelectedImage(url);
+  };
+
   const handleCreateCast = async () => {
     if (!caption.trim() || !currentUser) return;
     setIsSubmitting(true);
@@ -121,7 +131,7 @@ export default function CreatePage() {
         isVerified: true,
       },
       caption: caption.trim(),
-      imageUrl: "https://picsum.photos/seed/" + Date.now() + "/600/600",
+      imageUrl: selectedImage || "https://picsum.photos/seed/" + Date.now() + "/600/600",
       cityId: currentCity?.id || currentUser.cityId,
       likes: 0,
       comments: [],
@@ -340,10 +350,35 @@ export default function CreatePage() {
             autoFocus
             className="w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
           />
-          <button className="flex items-center gap-2 rounded-xl border border-dashed p-8 w-full text-muted-foreground hover:bg-muted/30 transition-colors">
-            <ImagePlus className="h-6 w-6" />
-            <span className="text-sm">Add photo</span>
-          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          {selectedImage ? (
+            <div className="relative rounded-xl overflow-hidden">
+              <div className="relative aspect-square">
+                <Image src={selectedImage} alt="Selected" fill className="object-cover" sizes="600px" />
+              </div>
+              <button
+                onClick={() => { setSelectedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 rounded-xl border border-dashed p-8 w-full text-muted-foreground hover:bg-muted/30 transition-colors"
+            >
+              <ImagePlus className="h-6 w-6" />
+              <span className="text-sm">Add photo</span>
+            </button>
+          )}
         </div>
       </div>
     );
