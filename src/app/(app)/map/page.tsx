@@ -39,7 +39,7 @@ export default function MapPage() {
       <AppHeader title="Map" />
 
       {/* Filters Bar */}
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 flex gap-2 overflow-x-auto no-scrollbar border-b border-[#f0f0f0]">
+      <div className="sticky top-[57px] sm:top-[73px] z-30 bg-white/80 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 flex gap-2 overflow-x-auto no-scrollbar border-b border-[#f0f0f0]">
         {filters.map((f) => {
           const Icon = f.icon;
           return (
@@ -60,9 +60,9 @@ export default function MapPage() {
         })}
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
         {/* Map Area */}
-        <div className="relative h-[500px] overflow-hidden rounded-[40px] border border-[#f0f0f0] bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 shadow-sm shadow-black/5">
+        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden rounded-[24px] sm:rounded-[40px] border border-[#f0f0f0] bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 shadow-sm shadow-black/5">
           {/* Grid lines for map feel */}
           <div className="absolute inset-0 opacity-10">
             {[...Array(8)].map((_, i) => (
@@ -124,27 +124,27 @@ export default function MapPage() {
         </div>
 
         {/* Bottom stats cards */}
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
-            <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-4">
-              <Users className="h-5 w-5" />
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6 sm:mt-8">
+          <div className="rounded-[20px] sm:rounded-[32px] bg-white border border-[#f0f0f0] p-4 sm:p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-2 sm:mb-4">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <p className="text-xl font-black leading-none">8</p>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Nearby</p>
+            <p className="text-lg sm:text-xl font-black leading-none">8</p>
+            <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 sm:mt-2 font-mono">Nearby</p>
           </div>
-          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
-            <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-5 w-5" />
+          <div className="rounded-[20px] sm:rounded-[32px] bg-white border border-[#f0f0f0] p-4 sm:p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-2 sm:mb-4">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <p className="text-xl font-black leading-none">{nearbyCount}</p>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Events</p>
+            <p className="text-lg sm:text-xl font-black leading-none">{nearbyCount}</p>
+            <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 sm:mt-2 font-mono">Events</p>
           </div>
-          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
-            <div className="h-10 w-10 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center mx-auto mb-4">
-              <Coffee className="h-5 w-5" />
+          <div className="rounded-[20px] sm:rounded-[32px] bg-white border border-[#f0f0f0] p-4 sm:p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center mx-auto mb-2 sm:mb-4">
+              <Coffee className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <p className="text-xl font-black leading-none">4</p>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Places</p>
+            <p className="text-lg sm:text-xl font-black leading-none">4</p>
+            <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 sm:mt-2 font-mono">Places</p>
           </div>
         </div>
       </div>

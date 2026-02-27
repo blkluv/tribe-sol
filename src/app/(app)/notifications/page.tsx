@@ -41,7 +41,7 @@ export default function NotificationsPage() {
     <div className="bg-[#fcfcfc] min-h-screen">
       <AppHeader title="Activity" />
 
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
+      <div className="sticky top-[57px] sm:top-[73px] z-30 bg-white/80 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b border-[#f0f0f0]">
         <h2 className="text-xl font-bold tracking-tight">Recent</h2>
         {unreadCount > 0 && (
           <button
@@ -54,7 +54,7 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col gap-3">
           {notifications.map((notif) => {
             const Icon = iconMap[notif.type] || Heart;
@@ -64,11 +64,11 @@ export default function NotificationsPage() {
               <button
                 key={notif.id}
                 onClick={() => handleNotifClick(notif.id, notif.href)}
-                className={`flex items-center gap-4 p-5 rounded-[28px] text-left transition-all hover:shadow-xl hover:shadow-black/[0.03] active:scale-[0.98] border ${!notif.isRead ? "bg-white border-primary/20 shadow-md shadow-primary/5" : "bg-white border-[#f0f0f0]"
+                className={`flex items-center gap-3 sm:gap-4 p-3.5 sm:p-5 rounded-[20px] sm:rounded-[28px] text-left transition-all hover:shadow-xl hover:shadow-black/[0.03] active:scale-[0.98] border ${!notif.isRead ? "bg-white border-primary/20 shadow-md shadow-primary/5" : "bg-white border-[#f0f0f0]"
                   }`}
               >
                 <div className="relative shrink-0">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-[20px] border border-[#f0f0f0]">
+                  <div className="relative h-11 w-11 sm:h-14 sm:w-14 overflow-hidden rounded-[16px] sm:rounded-[20px] border border-[#f0f0f0]">
                     <Image src={notif.avatar} alt="" fill className="object-cover" sizes="56px" />
                   </div>
                   <div className={`absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white ${colorClass}`}>

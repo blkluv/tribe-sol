@@ -27,7 +27,7 @@ export default function ExplorePage() {
       <AppHeader title="Explore" />
 
       {/* Search & Categories Bar */}
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 space-y-4 border-b border-[#f0f0f0]">
+      <div className="sticky top-[57px] sm:top-[73px] z-30 bg-white/80 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4 border-b border-[#f0f0f0]">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -55,7 +55,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Single Column Feed Layout */}
-      <div className="px-6 py-8 max-w-2xl mx-auto">
+      <div className="px-3 sm:px-6 py-6 sm:py-8 max-w-2xl mx-auto">
         <div className="flex flex-col gap-6">
           {filteredEvents.map((event) => (
             <EventCard key={event.id} event={event} />

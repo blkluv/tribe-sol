@@ -44,7 +44,7 @@ function ActivityGrid({ casts, isLoading }: { casts: Cast[]; isLoading?: boolean
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2 px-6 pb-20">
+    <div className="grid grid-cols-3 gap-1.5 sm:gap-2 px-3 sm:px-6 pb-20">
       {mediaCasts.map((cast) => (
         <div key={cast.id} className="group relative aspect-square overflow-hidden rounded-[20px] bg-muted border border-[#f0f0f0]">
           <Image
@@ -91,7 +91,7 @@ function PostsFeed({ casts, isLoading }: { casts: Cast[]; isLoading?: boolean })
   }
 
   return (
-    <div className="flex flex-col gap-4 px-6 pb-24">
+    <div className="flex flex-col gap-4 px-3 sm:px-6 pb-24">
       {textCasts.map((cast) => (
         <CastCard key={cast.id} cast={cast} />
       ))}
@@ -152,8 +152,8 @@ export default function ProfilePage() {
 
       <div className="max-w-2xl mx-auto">
         {/* Profile Card */}
-        <div className="px-6 py-8">
-          <div className="bg-white rounded-[40px] border border-[#f0f0f0] p-8 shadow-sm relative overflow-hidden">
+        <div className="px-3 sm:px-6 py-6 sm:py-8">
+          <div className="bg-white rounded-[24px] sm:rounded-[40px] border border-[#f0f0f0] p-5 sm:p-8 shadow-sm relative overflow-hidden">
             {/* Visual Flair */}
             <div className="absolute top-0 right-0 p-8">
               <div className="bg-rose-50 text-rose-500 rounded-full h-12 w-12 flex items-center justify-center">
@@ -161,8 +161,8 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center sm:flex-row sm:items-start gap-8">
-              <div className="relative h-28 w-28 sm:h-32 sm:w-32 flex-none rounded-[40px] overflow-hidden border-4 border-[#f9f9f9] shadow-inner shrink-0">
+            <div className="flex flex-col items-center sm:flex-row sm:items-start gap-5 sm:gap-8">
+              <div className="relative h-24 w-24 sm:h-32 sm:w-32 flex-none rounded-[28px] sm:rounded-[40px] overflow-hidden border-4 border-[#f9f9f9] shadow-inner shrink-0">
                 <Image
                   src={currentUser.avatarUrl}
                   alt={currentUser.displayName}
@@ -172,7 +172,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex-1 text-center sm:text-left pt-2">
-                <h2 className="text-3xl font-black tracking-tighter text-black flex items-center justify-center sm:justify-start gap-2">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tighter text-black flex items-center justify-center sm:justify-start gap-2">
                   {displayName}
                   <ShieldCheck className="h-6 w-6 text-blue-500" />
                 </h2>
@@ -180,18 +180,18 @@ export default function ProfilePage() {
                   @{currentUser.username}
                 </p>
 
-                <div className="flex flex-wrap justify-center sm:justify-start gap-6 mt-6">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-4 sm:gap-6 mt-4 sm:mt-6">
                   <div className="text-center sm:text-left">
-                    <p className="text-[20px] font-black leading-none">{formatNumber(socialCounts.followers)}</p>
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1.5">Followers</p>
+                    <p className="text-[17px] sm:text-[20px] font-black leading-none">{formatNumber(socialCounts.followers)}</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Followers</p>
                   </div>
                   <div className="text-center sm:text-left">
-                    <p className="text-[20px] font-black leading-none">{formatNumber(socialCounts.following)}</p>
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1.5">Following</p>
+                    <p className="text-[17px] sm:text-[20px] font-black leading-none">{formatNumber(socialCounts.following)}</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Following</p>
                   </div>
                   <div className="text-center sm:text-left">
-                    <p className="text-[20px] font-black leading-none">{karma?.totalKarma || 0}</p>
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1.5">Karma</p>
+                    <p className="text-[17px] sm:text-[20px] font-black leading-none">{karma?.totalKarma || 0}</p>
+                    <p className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Karma</p>
                   </div>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="flex gap-3 mt-10">
+            <div className="flex gap-2 sm:gap-3 mt-6 sm:mt-10">
               <button
                 onClick={() => {
                   setEditName(displayName || "");
@@ -224,21 +224,21 @@ export default function ProfilePage() {
                   setEditLocation(currentUser.location || "");
                   setIsEditing(true);
                 }}
-                className="flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl bg-black text-white text-[14px] font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-black/10"
+                className="flex-1 flex items-center justify-center gap-2 h-12 sm:h-14 rounded-2xl bg-black text-white text-[13px] sm:text-[14px] font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-black/10"
               >
                 Edit Profile
               </button>
               <button
                 onClick={() => share(displayName, displayBio || "", `${window.location.origin}/profile`)}
-                className="h-14 w-14 flex items-center justify-center rounded-2xl bg-[#f5f5f5] text-black transition-all hover:bg-[#eeeeee] active:scale-90"
+                className="h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-2xl bg-[#f5f5f5] text-black transition-all hover:bg-[#eeeeee] active:scale-90"
               >
-                <Share2 className="h-6 w-6" />
+                <Share2 className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
               <Link
                 href="/settings"
-                className="h-14 w-14 flex items-center justify-center rounded-2xl bg-[#f5f5f5] text-black transition-all hover:bg-[#eeeeee] active:scale-90"
+                className="h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-2xl bg-[#f5f5f5] text-black transition-all hover:bg-[#eeeeee] active:scale-90"
               >
-                <Settings className="h-6 w-6" />
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
               </Link>
             </div>
           </div>
@@ -246,8 +246,8 @@ export default function ProfilePage() {
 
         {/* Karma Pulse Section */}
         {karma && levelConfig && (
-          <div className="px-6 pb-8">
-            <div className="p-8 rounded-[40px] bg-indigo-50 border border-indigo-100 shadow-sm">
+          <div className="px-3 sm:px-6 pb-6 sm:pb-8">
+            <div className="p-5 sm:p-8 rounded-[24px] sm:rounded-[40px] bg-indigo-50 border border-indigo-100 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 flex items-center justify-center rounded-[24px] bg-white text-indigo-500 shadow-lg shadow-indigo-500/10">
@@ -273,7 +273,7 @@ export default function ProfilePage() {
         )}
 
         {/* Action Tabs */}
-        <div className="flex px-6 mb-8 gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex px-3 sm:px-6 mb-6 sm:mb-8 gap-2 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -295,7 +295,7 @@ export default function ProfilePage() {
         {activeTab === "Media" && <ActivityGrid casts={tapestryPosts} isLoading={postsLoading} />}
 
         {activeTab === "Badges" && (
-          <div className="grid grid-cols-2 gap-4 px-6 pb-24">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 px-3 sm:px-6 pb-24">
             {["Leader", "Organizer", "Contributor", "Adventurer"].map((badge) => (
               <div key={badge} className="flex flex-col items-center justify-center gap-4 rounded-[32px] bg-white border border-[#f0f0f0] px-6 py-10 shadow-sm transition-all hover:shadow-xl hover:shadow-black/[0.03]">
                 <div className="h-20 w-20 rounded-[28px] bg-amber-50 text-amber-500 flex items-center justify-center">
@@ -308,7 +308,7 @@ export default function ProfilePage() {
         )}
 
         {activeTab === "Stats" && (
-          <div className="flex flex-col gap-3 px-6 pb-24">
+          <div className="flex flex-col gap-3 px-3 sm:px-6 pb-24">
             {karma && Object.entries(karma.breakdown).map(([label, value]) => (
               <div key={label} className="flex items-center justify-between h-20 px-8 rounded-[28px] bg-white border border-[#f0f0f0] shadow-sm">
                 <span className="text-[14px] font-bold text-muted-foreground uppercase tracking-widest">{label.replace('Karma', '')} Pulse</span>
@@ -321,9 +321,9 @@ export default function ProfilePage() {
 
       {/* Edit Form Modal (Simplified) */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-[40px] w-full max-w-lg p-10 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-black tracking-tight mb-8">Edit Identity</h3>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-t-[32px] sm:rounded-[40px] w-full max-w-lg p-6 sm:p-10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-6 sm:mb-8">Edit Identity</h3>
             <div className="space-y-6">
               <div>
                 <label className="text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2 block">Display Name</label>

@@ -21,7 +21,7 @@ export default function ChatPage() {
       <AppHeader title="Chat" />
 
       {/* Search Header */}
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 border-b border-[#f0f0f0]">
+      <div className="sticky top-[57px] sm:top-[73px] z-30 bg-white/80 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 border-b border-[#f0f0f0]">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -32,7 +32,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col gap-3">
           {chatPreviews.map((chat) => {
             const tribe = tribes.find((t) => t.id === chat.tribeId);
@@ -40,11 +40,11 @@ export default function ChatPage() {
               <Link
                 key={chat.tribeId}
                 href={`/chat/${chat.tribeId}`}
-                className={`group flex items-center gap-4 p-5 rounded-[28px] bg-white border border-[#f0f0f0] transition-all hover:shadow-xl hover:shadow-black/[0.03] active:scale-[0.98] ${chat.unread > 0 ? "border-primary/20 shadow-md shadow-primary/5" : ""
+                className={`group flex items-center gap-3 sm:gap-4 p-3.5 sm:p-5 rounded-[20px] sm:rounded-[28px] bg-white border border-[#f0f0f0] transition-all hover:shadow-xl hover:shadow-black/[0.03] active:scale-[0.98] ${chat.unread > 0 ? "border-primary/20 shadow-md shadow-primary/5" : ""
                   }`}
               >
                 <div
-                  className="flex h-14 w-14 items-center justify-center rounded-[20px] text-2xl shadow-lg shadow-black/5 shrink-0"
+                  className="flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-[16px] sm:rounded-[20px] text-xl sm:text-2xl shadow-lg shadow-black/5 shrink-0"
                   style={{ backgroundColor: tribe ? `${tribe.color}20` : "#f5f5f5" }}
                 >
                   {chat.icon || "💬"}
