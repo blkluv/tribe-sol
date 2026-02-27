@@ -139,7 +139,7 @@ export default function WalletPage() {
 
           <div className="flex gap-2">
             <a
-              href={`https://explorer.solana.com/address/${walletAddress}?cluster=devnet`}
+              href={`https://explorer.solana.com/address/${walletAddress}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
@@ -164,7 +164,7 @@ export default function WalletPage() {
             <ArrowDownLeft className="h-4 w-4" />
             <span className="text-sm font-medium">Network</span>
           </div>
-          <p className="mt-1 text-lg font-bold">Devnet</p>
+          <p className="mt-1 text-lg font-bold">Mainnet</p>
         </div>
         <div className="rounded-xl border p-3">
           <div className="flex items-center gap-2 text-indigo-500">
@@ -194,7 +194,7 @@ export default function WalletPage() {
                   </p>
                 </div>
                 <a
-                  href={`https://explorer.solana.com/tx/${tip.signature}?cluster=devnet`}
+                  href={`https://explorer.solana.com/tx/${tip.signature}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-foreground"

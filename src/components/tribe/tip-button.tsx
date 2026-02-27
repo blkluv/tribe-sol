@@ -102,7 +102,7 @@ export function TipButton({
                 </p>
                 {result.signature && (
                   <a
-                    href={`https://explorer.solana.com/tx/${result.signature}?cluster=devnet`}
+                    href={`https://explorer.solana.com/tx/${result.signature}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
