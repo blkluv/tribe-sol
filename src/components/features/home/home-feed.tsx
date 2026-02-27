@@ -13,6 +13,7 @@ import { TaskCard } from "./task-card";
 import { CrowdfundCard } from "./crowdfund-card";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/tribe/wallet-button";
+import { AppHeader } from "@/components/layout/app-header";
 
 // Lazy-load cities data
 let citiesCache: City[] | null = null;
@@ -80,32 +81,7 @@ export function HomeFeed() {
 
   return (
     <div className="pb-24 bg-[#fcfcfc] min-h-screen">
-      {/* Redesigned Header per User Request */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black text-white text-lg font-black tracking-tighter shadow-xl shadow-black/10">
-            {currentCity.name.charAt(0)}
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold tracking-tight leading-none">{currentCity.name}</h1>
-            <button
-              onClick={() => {/* Trigger city switcher modal */ }}
-              className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity text-left mt-1.5"
-            >
-              Switch City
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-1.5">
-          <WalletButton className="h-10 rounded-xl px-4 text-xs font-bold" />
-          {profile && (
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-              @{profile.username}
-            </span>
-          )}
-        </div>
-      </div>
+      <AppHeader />
 
       {/* Tribe Pulse Bar (Alternative to Stories) */}
       <div className="px-6 py-6 overflow-hidden">

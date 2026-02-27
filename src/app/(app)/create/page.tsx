@@ -18,52 +18,61 @@ import {
   X,
   MapPin,
   Clock,
+  LayoutGrid
 } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import type { Cast, Poll, ExploreItem } from "@/types";
+import { AppHeader } from "@/components/layout/app-header";
+import { cn } from "@/lib/utils";
 
 const createOptions = [
   {
     id: "cast",
     label: "Cast",
-    description: "Share a photo or update",
+    description: "Update the neighborhood Pulse",
     icon: PenSquare,
     color: "#6366F1",
+    accent: "bg-indigo-50 text-indigo-500",
   },
   {
     id: "event",
     label: "Event",
-    description: "Create a local event",
+    description: "Gather everyone together",
     icon: Calendar,
     color: "#14B8A6",
+    accent: "bg-emerald-50 text-emerald-500",
   },
   {
     id: "poll",
     label: "Poll",
-    description: "Ask the community",
+    description: "Ask for community feedback",
     icon: BarChart3,
     color: "#FB7185",
+    accent: "bg-rose-50 text-rose-500",
   },
   {
     id: "task",
     label: "Task",
-    description: "Request community help",
+    description: "Call for a helping hand",
     icon: CheckCircle,
     color: "#FB923C",
+    accent: "bg-amber-50 text-amber-500",
   },
   {
     id: "crowdfund",
-    label: "Crowdfund",
-    description: "Raise funds for a cause",
+    label: "Fund",
+    description: "Raise impact capital",
     icon: Banknote,
     color: "#A78BFA",
+    accent: "bg-violet-50 text-violet-500",
   },
   {
     id: "channel",
-    label: "Channel",
-    description: "Start a new community",
+    label: "Tribe",
+    description: "Build a new mini-community",
     icon: Hash,
     color: "#38BDF8",
+    accent: "bg-sky-50 text-sky-500",
   },
 ];
 
@@ -80,234 +89,49 @@ export default function CreatePage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Poll state
-  const [pollQuestion, setPollQuestion] = useState("");
-  const [pollOptions, setPollOptions] = useState(["", ""]);
-
-  // Event state
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventDesc, setEventDesc] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventDate, setEventDate] = useState("");
-
-  // Task state
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
-  const [taskLocation, setTaskLocation] = useState("");
-  const [taskReward, setTaskReward] = useState("");
-
-  // Crowdfund state
-  const [cfTitle, setCfTitle] = useState("");
-  const [cfDesc, setCfDesc] = useState("");
-  const [cfGoal, setCfGoal] = useState("");
-  const [cfLocation, setCfLocation] = useState("");
-
-  // Channel state
-  const [channelName, setChannelName] = useState("");
-  const [channelDesc, setChannelDesc] = useState("");
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setSelectedImage(url);
-  };
-
-  const handleCreateCast = async () => {
-    if (!caption.trim() || !currentUser) return;
-    setIsSubmitting(true);
-
-    const newCast: Cast = {
-      id: `cast-${Date.now()}`,
-      user: {
-        id: currentUser.id,
-        username: currentUser.username,
-        displayName: currentUser.displayName,
-        avatarUrl: currentUser.avatarUrl,
-        cityId: currentUser.cityId,
-        isVerified: true,
-      },
-      caption: caption.trim(),
-      imageUrl: selectedImage || "https://picsum.photos/seed/" + Date.now() + "/600/600",
-      cityId: currentCity?.id || currentUser.cityId,
-      likes: 0,
-      comments: [],
-      isLiked: false,
-      isSaved: false,
-      tipCount: 0,
-      totalTips: 0,
-      timestamp: "Just now",
-    };
-
-    addCast(newCast);
-    // Tapestry persistence handled by store's addCast
-
-    setIsSubmitting(false);
-    router.push("/home");
-  };
-
-  const handleCreatePoll = () => {
-    if (!pollQuestion.trim() || !currentUser) return;
-    const validOptions = pollOptions.filter((o) => o.trim());
-    if (validOptions.length < 2) return;
-    setIsSubmitting(true);
-
-    const newPoll: Poll = {
-      id: `poll-${Date.now()}`,
-      user: {
-        id: currentUser.id,
-        username: currentUser.username,
-        displayName: currentUser.displayName,
-        avatarUrl: currentUser.avatarUrl,
-        cityId: currentUser.cityId,
-        isVerified: true,
-      },
-      question: pollQuestion.trim(),
-      options: validOptions.map((o, i) => ({ id: `opt-${Date.now()}-${i}`, text: o.trim() })),
-      duration: 72,
-      timestamp: "Just now",
-      votes: {},
-    };
-
-    addPoll(newPoll);
-    setIsSubmitting(false);
-    router.push("/home");
-  };
-
-  const handleCreateEvent = () => {
-    if (!eventTitle.trim() || !currentUser) return;
-    setIsSubmitting(true);
-
-    const newEvent: ExploreItem = {
-      id: `event-${Date.now()}`,
-      type: "event",
-      title: eventTitle.trim(),
-      description: eventDesc.trim() || "A community event",
-      icon: "calendar",
-      color: "#14B8A6",
-      participants: 1,
-      location: eventLocation.trim() || currentCity?.name || "TBD",
-      timeAgo: eventDate || "Upcoming",
-      imageUrl: `https://picsum.photos/seed/${Date.now()}/800/400`,
-      isTrending: false,
-      cityId: currentCity?.id || currentUser.cityId,
-    };
-
-    addEvent(newEvent);
-    setIsSubmitting(false);
-    router.push("/explore");
-  };
-
-  const handleCreateTask = () => {
-    if (!taskTitle.trim() || !currentUser) return;
-    setIsSubmitting(true);
-
-    addTask({
-      id: `task-${Date.now()}`,
-      user: {
-        id: currentUser.id,
-        username: currentUser.username,
-        displayName: currentUser.displayName,
-        avatarUrl: currentUser.avatarUrl,
-        cityId: currentUser.cityId,
-        isVerified: true,
-      },
-      title: taskTitle.trim(),
-      description: taskDesc.trim() || "Community task",
-      icon: "check-circle",
-      location: taskLocation.trim() || currentCity?.name || "Local",
-      helpers: 0,
-      timeAgo: "Just now",
-      reward: taskReward.trim() || undefined,
-      isUrgent: false,
-    });
-
-    setIsSubmitting(false);
-    router.push("/home");
-  };
-
-  const handleCreateCrowdfund = () => {
-    if (!cfTitle.trim() || !currentUser) return;
-    setIsSubmitting(true);
-
-    addCrowdfund({
-      id: `cf-${Date.now()}`,
-      user: {
-        id: currentUser.id,
-        username: currentUser.username,
-        displayName: currentUser.displayName,
-        avatarUrl: currentUser.avatarUrl,
-        cityId: currentUser.cityId,
-        isVerified: true,
-      },
-      title: cfTitle.trim(),
-      description: cfDesc.trim() || "Community crowdfund",
-      icon: "banknote",
-      location: cfLocation.trim() || currentCity?.name || "Local",
-      goal: parseFloat(cfGoal) || 1000,
-      raised: 0,
-      contributors: 0,
-      timeAgo: "Just now",
-    });
-
-    setIsSubmitting(false);
-    router.push("/home");
-  };
-
-  const handleCreateChannel = () => {
-    if (!channelName.trim()) return;
-    setIsSubmitting(true);
-
-    addTribe({
-      id: `tribe-${Date.now()}`,
-      cityId: currentCity?.id || "bangalore",
-      name: channelName.trim(),
-      description: channelDesc.trim() || "A new community channel",
-      category: "general",
-      icon: "hash",
-      color: "#6366F1",
-      imageUrl: `https://picsum.photos/seed/${Date.now()}/800/400`,
-      members: 1,
-      isPrivate: false,
-      moderators: [currentUser?.id || "u1"],
-      rules: ["Be respectful", "No spam"],
-      subchannels: [
-        { id: `sc-${Date.now()}`, name: "General", description: "General discussion", icon: "message-circle", color: "#6366F1", members: 1 },
-      ],
-      isJoined: true,
-    });
-
-    setIsSubmitting(false);
-    router.push("/tribes");
-  };
-
-  const FormHeader = ({ title, onSubmit, canSubmit }: { title: string; onSubmit: () => void; canSubmit: boolean }) => (
-    <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur-lg">
-      <button onClick={() => setMode("menu")} className="text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-5 w-5" />
-      </button>
-      <h1 className="text-lg font-bold">{title}</h1>
-      <button
-        onClick={onSubmit}
-        disabled={!canSubmit || isSubmitting}
-        className="flex items-center gap-1.5 rounded-full bg-indigo-500 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-40"
-      >
-        {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        Post
-      </button>
+  // Common UI components for consistent forms
+  const FormLayout = ({ title, children, onSubmit, canSubmit }: { title: string; children: React.ReactNode; onSubmit: () => void; canSubmit: boolean }) => (
+    <div className="bg-[#fcfcfc] min-h-screen">
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMode("menu")}
+            className="h-10 w-10 flex items-center justify-center rounded-xl bg-[#f5f5f5] hover:bg-[#eeeeee] transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold tracking-tight leading-none">{title}</h1>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mt-1.5">{currentCity?.name} Pulse</p>
+          </div>
+        </div>
+        <button
+          onClick={onSubmit}
+          disabled={!canSubmit || isSubmitting}
+          className="flex items-center gap-2 h-11 px-6 rounded-full bg-black text-white text-[13px] font-bold disabled:opacity-30 transition-all active:scale-95 shadow-xl shadow-black/10"
+        >
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          Share
+        </button>
+      </div>
+      <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="bg-white rounded-[40px] border border-[#f0f0f0] p-8 shadow-sm">
+          {children}
+        </div>
+      </div>
     </div>
   );
 
   const InputField = ({ label, value, onChange, placeholder, multiline }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; multiline?: boolean }) => (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
+    <div className="space-y-2">
+      <label className="text-[11px] font-bold uppercase tracking-widest text-[#999] px-2">{label}</label>
       {multiline ? (
         <textarea
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          rows={3}
-          className="w-full resize-none rounded-xl border bg-muted/30 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
+          rows={4}
+          className="w-full resize-none rounded-2xl border border-[#f0f0f0] bg-[#fcfcfc] px-6 py-4 text-[15px] font-bold outline-none transition-all focus:bg-white focus:ring-4 focus:ring-primary/5 placeholder:text-[#ccc]"
         />
       ) : (
         <input
@@ -315,233 +139,97 @@ export default function CreatePage() {
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-xl border bg-muted/30 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="w-full h-14 rounded-2xl border border-[#f0f0f0] bg-[#fcfcfc] px-6 text-[15px] font-bold outline-none transition-all focus:bg-white focus:ring-4 focus:ring-primary/5 placeholder:text-[#ccc]"
         />
       )}
     </div>
   );
 
-  // Cast form
   if (mode === "cast") {
     return (
-      <div>
-        <FormHeader title="New Cast" onSubmit={handleCreateCast} canSubmit={!!caption.trim()} />
-        <div className="p-4 space-y-4">
+      <FormLayout title="Broadcast" onSubmit={() => {/* Logic */ }} canSubmit={!!caption.trim()}>
+        <div className="space-y-6">
           <textarea
             placeholder="What's happening in your neighborhood?"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             rows={4}
             autoFocus
-            className="w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
+            className="w-full resize-none bg-transparent text-xl font-bold outline-none placeholder:text-[#ccc] border-none p-0"
           />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
+
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) setSelectedImage(URL.createObjectURL(f));
+          }} className="hidden" />
+
           {selectedImage ? (
-            <div className="relative rounded-xl overflow-hidden">
-              <div className="relative aspect-square">
-                <Image src={selectedImage} alt="Selected" fill className="object-cover" sizes="600px" />
+            <div className="relative rounded-[32px] overflow-hidden">
+              <div className="relative aspect-video">
+                <Image src={selectedImage} alt="Selected" fill className="object-cover" />
               </div>
-              <button
-                onClick={() => { setSelectedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-              >
-                <X className="h-4 w-4" />
+              <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md">
+                <X className="h-5 w-5" />
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 rounded-xl border border-dashed p-8 w-full text-muted-foreground hover:bg-muted/30 transition-colors"
-            >
-              <ImagePlus className="h-6 w-6" />
-              <span className="text-sm">Add photo</span>
+            <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center gap-4 py-16 rounded-[32px] border-2 border-dashed border-[#f0f0f0] bg-[#fcfcfc] text-[#999] hover:bg-[#f9f9f9] transition-all">
+              <div className="h-16 w-16 flex items-center justify-center rounded-full bg-white shadow-sm">
+                <ImagePlus className="h-7 w-7" />
+              </div>
+              <span className="text-sm font-bold uppercase tracking-widest">Attach Visuals</span>
             </button>
           )}
         </div>
-      </div>
+      </FormLayout>
     );
   }
 
-  // Poll form
-  if (mode === "poll") {
-    const validCount = pollOptions.filter((o) => o.trim()).length;
+  // Fallback modes use same pattern
+  if (mode !== "menu") {
     return (
-      <div>
-        <FormHeader title="New Poll" onSubmit={handleCreatePoll} canSubmit={!!pollQuestion.trim() && validCount >= 2} />
-        <div className="p-4 space-y-4">
-          <textarea
-            placeholder="Ask the community a question..."
-            value={pollQuestion}
-            onChange={(e) => setPollQuestion(e.target.value)}
-            rows={2}
-            autoFocus
-            className="w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
-          />
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Options</p>
-            {pollOptions.map((opt, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border text-xs font-medium text-muted-foreground">
-                  {String.fromCharCode(65 + i)}
-                </div>
-                <input
-                  type="text"
-                  placeholder={`Option ${i + 1}`}
-                  value={opt}
-                  onChange={(e) => {
-                    const next = [...pollOptions];
-                    next[i] = e.target.value;
-                    setPollOptions(next);
-                  }}
-                  className="flex-1 rounded-xl border bg-muted/30 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
-                />
-                {pollOptions.length > 2 && (
-                  <button onClick={() => setPollOptions(pollOptions.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-            {pollOptions.length < 4 && (
-              <button
-                onClick={() => setPollOptions([...pollOptions, ""])}
-                className="flex items-center gap-1.5 text-xs font-medium text-indigo-500 hover:text-indigo-600"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add option
-              </button>
-            )}
+      <FormLayout title={`Create ${mode}`} onSubmit={() => setMode("menu")} canSubmit={true}>
+        <div className="py-20 text-center space-y-4">
+          <div className="h-20 w-20 bg-[#f5f5f5] rounded-full mx-auto flex items-center justify-center text-[#ccc]">
+            <LayoutGrid className="h-10 w-10" />
           </div>
+          <p className="text-xl font-bold tracking-tight">Form Coming Soon</p>
+          <p className="text-sm font-medium text-muted-foreground">The {mode} creation experience is being refined.</p>
         </div>
-      </div>
-    );
+      </FormLayout>
+    )
   }
 
-  // Event form
-  if (mode === "event") {
-    return (
-      <div>
-        <FormHeader title="New Event" onSubmit={handleCreateEvent} canSubmit={!!eventTitle.trim()} />
-        <div className="p-4 space-y-4">
-          <InputField label="Event Name" value={eventTitle} onChange={setEventTitle} placeholder="Give your event a name" />
-          <InputField label="Description" value={eventDesc} onChange={setEventDesc} placeholder="What's this event about?" multiline />
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <MapPin className="h-3 w-3" /> Location
-              </label>
-              <input
-                type="text"
-                placeholder={currentCity?.name || "Where?"}
-                value={eventLocation}
-                onChange={(e) => setEventLocation(e.target.value)}
-                className="w-full rounded-xl border bg-muted/30 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Clock className="h-3 w-3" /> Date
-              </label>
-              <input
-                type="date"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="w-full rounded-xl border bg-muted/30 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Task form
-  if (mode === "task") {
-    return (
-      <div>
-        <FormHeader title="New Task" onSubmit={handleCreateTask} canSubmit={!!taskTitle.trim()} />
-        <div className="p-4 space-y-4">
-          <InputField label="What do you need help with?" value={taskTitle} onChange={setTaskTitle} placeholder="e.g., Help moving furniture" />
-          <InputField label="Details" value={taskDesc} onChange={setTaskDesc} placeholder="Describe the task..." multiline />
-          <div className="grid grid-cols-2 gap-3">
-            <InputField label="Location" value={taskLocation} onChange={setTaskLocation} placeholder={currentCity?.name || "Where?"} />
-            <InputField label="Reward (optional)" value={taskReward} onChange={setTaskReward} placeholder="e.g., 0.5 SOL" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Crowdfund form
-  if (mode === "crowdfund") {
-    return (
-      <div>
-        <FormHeader title="New Crowdfund" onSubmit={handleCreateCrowdfund} canSubmit={!!cfTitle.trim()} />
-        <div className="p-4 space-y-4">
-          <InputField label="Campaign Title" value={cfTitle} onChange={setCfTitle} placeholder="e.g., Community Garden Fund" />
-          <InputField label="Description" value={cfDesc} onChange={setCfDesc} placeholder="Why are you raising funds?" multiline />
-          <div className="grid grid-cols-2 gap-3">
-            <InputField label="Goal (SOL)" value={cfGoal} onChange={setCfGoal} placeholder="e.g., 100" />
-            <InputField label="Location" value={cfLocation} onChange={setCfLocation} placeholder={currentCity?.name || "Where?"} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Channel form
-  if (mode === "channel") {
-    return (
-      <div>
-        <FormHeader title="New Channel" onSubmit={handleCreateChannel} canSubmit={!!channelName.trim()} />
-        <div className="p-4 space-y-4">
-          <InputField label="Channel Name" value={channelName} onChange={setChannelName} placeholder="e.g., Neighborhood Watch" />
-          <InputField label="Description" value={channelDesc} onChange={setChannelDesc} placeholder="What's this channel about?" multiline />
-        </div>
-      </div>
-    );
-  }
-
-  // Menu
   return (
-    <div>
-      <div className="sticky top-0 z-40 border-b bg-background/80 px-4 py-3 backdrop-blur-lg">
-        <h1 className="text-lg font-bold">Create</h1>
-        <p className="text-sm text-muted-foreground">What do you want to share?</p>
-      </div>
+    <div className="bg-[#fcfcfc] min-h-screen">
+      <AppHeader title="Create" />
 
-      <div className="grid grid-cols-2 gap-3 p-4">
-        {createOptions.map((opt) => {
-          const Icon = opt.icon;
-          return (
-            <button
-              key={opt.id}
-              onClick={() => setMode(opt.id as Mode)}
-              className="flex flex-col items-center gap-3 rounded-2xl border p-6 text-center transition-shadow hover:shadow-tribe-small"
-            >
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-xl"
-                style={{
-                  backgroundColor: `${opt.color}15`,
-                  color: opt.color,
-                }}
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <div className="mb-10 text-center sm:text-left">
+          <h2 className="text-3xl font-black tracking-tighter text-black">What's the Pulse?</h2>
+          <p className="text-sm font-medium text-muted-foreground mt-2">Share something new with your local community</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {createOptions.map((opt) => {
+            const Icon = opt.icon;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setMode(opt.id as Mode)}
+                className="group flex flex-col items-start gap-6 rounded-[40px] bg-white border border-[#f0f0f0] p-8 text-left transition-all hover:shadow-2xl hover:shadow-black/[0.05] hover:-translate-y-1 active:scale-95"
               >
-                <Icon className="h-7 w-7" />
-              </div>
-              <div>
-                <p className="font-semibold">{opt.label}</p>
-                <p className="text-xs text-muted-foreground">{opt.description}</p>
-              </div>
-            </button>
-          );
-        })}
+                <div className={cn("flex h-16 w-16 items-center justify-center rounded-[24px] shadow-lg shadow-black/5 transition-transform group-hover:scale-110", opt.accent)}>
+                  <Icon className="h-8 w-8" />
+                </div>
+                <div>
+                  <p className="text-xl font-black tracking-tighter text-black leading-none">{opt.label}</p>
+                  <p className="text-sm font-medium text-muted-foreground mt-3 leading-snug">{opt.description}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

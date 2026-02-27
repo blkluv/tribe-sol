@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Users, Lock } from "lucide-react";
+import { Search, Users, Lock, ArrowRight, UserPlus } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { tribeCategoryConfig } from "@/lib/theme";
 import { formatNumber } from "@/lib/utils";
 import type { TribeCategory } from "@/types";
+import { AppHeader } from "@/components/layout/app-header";
 
 export default function TribesPage() {
   const { tribes, currentCity } = useTribeStore();
@@ -26,27 +27,28 @@ export default function TribesPage() {
   const categories = Array.from(new Set(tribes.map((t) => t.category)));
 
   return (
-    <div>
-      <div className="sticky top-0 z-40 border-b bg-background/80 px-4 py-3 backdrop-blur-lg">
-        <h1 className="mb-3 text-lg font-bold">Tribes</h1>
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="bg-[#fcfcfc] min-h-screen">
+      <AppHeader title="Tribes" />
+
+      {/* Search & Categories Bar */}
+      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 space-y-4 border-b border-[#f0f0f0]">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search tribes..."
+            placeholder="Find your tribe..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border bg-muted/50 py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full rounded-2xl border border-[#f0f0f0] bg-[#f9f9f9] py-3.5 pl-12 pr-4 text-[15px] font-bold outline-none transition-all focus:bg-white focus:ring-4 focus:ring-primary/5"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveCategory("all")}
-            className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              activeCategory === "all"
-                ? "bg-foreground text-background"
-                : "bg-muted text-muted-foreground"
-            }`}
+            className={`whitespace-nowrap rounded-full px-5 py-2 text-[13px] font-bold transition-all active:scale-95 ${activeCategory === "all"
+                ? "bg-black text-white shadow-lg shadow-black/10"
+                : "bg-white border border-[#f0f0f0] text-muted-foreground hover:bg-muted/30"
+              }`}
           >
             All
           </button>
@@ -54,11 +56,10 @@ export default function TribesPage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                activeCategory === cat
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground"
-              }`}
+              className={`whitespace-nowrap rounded-full px-5 py-2 text-[13px] font-bold transition-all active:scale-95 ${activeCategory === cat
+                  ? "bg-black text-white shadow-lg shadow-black/10"
+                  : "bg-white border border-[#f0f0f0] text-muted-foreground hover:bg-muted/30"
+                }`}
             >
               {tribeCategoryConfig[cat]?.label || cat}
             </button>
@@ -66,34 +67,33 @@ export default function TribesPage() {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="px-6 py-8 max-w-2xl mx-auto space-y-10">
         {/* Your Tribes */}
         {joinedTribes.length > 0 && (
-          <div className="mb-6">
-            <h2 className="mb-3 text-base font-semibold">Your Tribes</h2>
-            <div className="space-y-3">
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold tracking-tight">Your Tribes</h2>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                {joinedTribes.length} Joined
+              </span>
+            </div>
+            <div className="flex flex-col gap-4">
               {joinedTribes.map((tribe) => (
-                <TribeListItem key={tribe.id} tribe={tribe} />
+                <TribeCard key={tribe.id} tribe={tribe} />
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Discover */}
-        {discoverTribes.length > 0 && (
-          <div>
-            <h2 className="mb-3 text-base font-semibold">Discover</h2>
-            <div className="space-y-3">
-              {discoverTribes.map((tribe) => (
-                <TribeListItem key={tribe.id} tribe={tribe} />
-              ))}
-            </div>
-          </div>
-        )}
+        {discoverTribes.length > 0 && (DiscoverTribesSection(discoverTribes))}
 
         {filtered.length === 0 && (
-          <div className="flex h-48 items-center justify-center text-muted-foreground">
-            No tribes found
+          <div className="flex h-[40vh] flex-col items-center justify-center space-y-4 text-center">
+            <div className="rounded-[32px] bg-muted/30 p-8">
+              <Users className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <p className="text-xl font-bold tracking-tight text-black">No tribes found</p>
           </div>
         )}
       </div>
@@ -101,43 +101,78 @@ export default function TribesPage() {
   );
 }
 
-function TribeListItem({ tribe }: { tribe: import("@/types").Tribe }) {
+function DiscoverTribesSection(tribes: any[]) {
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold tracking-tight">Discover</h2>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          Local Communities
+        </span>
+      </div>
+      <div className="flex flex-col gap-4">
+        {tribes.map((tribe) => (
+          <TribeCard key={tribe.id} tribe={tribe} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function TribeCard({ tribe }: { tribe: any }) {
   const { joinTribe, leaveTribe } = useTribeStore();
 
   return (
     <Link
       href={`/tribes/${tribe.id}`}
-      className="flex items-center gap-3 rounded-2xl border p-3 transition-shadow hover:shadow-tribe-subtle"
+      className="group flex items-center gap-5 rounded-[32px] bg-white border border-[#f0f0f0] p-5 transition-all hover:shadow-xl hover:shadow-black/[0.03] active:scale-[0.98]"
     >
       <div
-        className="flex h-12 w-12 items-center justify-center rounded-xl text-white"
-        style={{ backgroundColor: `#${tribe.color}` }}
+        className="flex h-16 w-16 items-center justify-center rounded-[20px] text-white shrink-0 shadow-lg shadow-black/5"
+        style={{ backgroundColor: tribe.imageUrl ? 'transparent' : `#${tribe.color}` }}
       >
-        <Users className="h-5 w-5" />
+        {tribe.imageUrl ? (
+          <div className="relative h-full w-full rounded-[20px] overflow-hidden">
+            <Image src={tribe.imageUrl} alt={tribe.name} fill className="object-cover" />
+          </div>
+        ) : (
+          <Users className="h-7 w-7" />
+        )}
       </div>
+
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold truncate">{tribe.name}</span>
-          {tribe.isPrivate && <Lock className="h-3 w-3 text-muted-foreground" />}
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span className="text-[17px] font-bold tracking-tight truncate">{tribe.name}</span>
+          {tribe.isPrivate && <Lock className="h-3.5 w-3.5 text-[#999]" />}
         </div>
-        <p className="text-xs text-muted-foreground">
-          {formatNumber(tribe.members)} members
-        </p>
+        <div className="flex items-center gap-2 text-[12px] font-bold text-muted-foreground uppercase tracking-widest">
+          {formatNumber(tribe.members)} Members
+          <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+          Active Now
+        </div>
       </div>
+
       <button
         onClick={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           tribe.isJoined ? leaveTribe(tribe.id) : joinTribe(tribe.id);
         }}
-        className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+        className={cn(
+          "h-11 px-6 rounded-full text-[13px] font-bold transition-all shrink-0 active:scale-90",
           tribe.isJoined
-            ? "bg-muted text-muted-foreground hover:bg-red-100 hover:text-red-600"
-            : "text-white"
-        }`}
-        style={!tribe.isJoined ? { backgroundColor: "var(--tribe-primary)" } : undefined}
+            ? "bg-[#f5f5f5] text-[#666] hover:bg-red-50 hover:text-red-500"
+            : "bg-black text-white hover:bg-black/90"
+        )}
       >
-        {tribe.isJoined ? "Joined" : "Join"}
+        {tribe.isJoined ? "Member" : "Join"}
       </button>
+
+      <div className="hidden group-hover:block transition-all ml-1">
+        <ArrowRight className="h-5 w-5 text-black/20" />
+      </div>
     </Link>
   );
 }
+
+import { cn } from "@/lib/utils";

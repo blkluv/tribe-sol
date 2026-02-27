@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Search, MapPin, Users, Calendar, Flame } from "lucide-react";
+import { Search } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
-import { cn, formatNumber } from "@/lib/utils";
+import { AppHeader } from "@/components/layout/app-header";
+import { EventCard } from "@/components/features/home/event-card";
 
 const categories = ["All", "Events", "Trending", "Nearby"];
 
@@ -24,9 +23,11 @@ export default function ExplorePage() {
     .sort((a, b) => activeCategory === "Nearby" ? b.participants - a.participants : 0);
 
   return (
-    <div className="bg-background">
-      {/* Search Bar Header */}
-      <div className="sticky top-0 z-40 space-y-4 border-b bg-background/95 px-4 py-4 backdrop-blur-md">
+    <div className="bg-[#fcfcfc] min-h-screen">
+      <AppHeader title="Explore" />
+
+      {/* Search & Categories Bar */}
+      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 space-y-4 border-b border-[#f0f0f0]">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -34,7 +35,7 @@ export default function ExplorePage() {
             placeholder={`Search in ${currentCity?.name || "your city"}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border bg-muted/30 py-3 pl-12 pr-4 text-[15px] font-medium outline-none transition-all focus:bg-background focus:ring-2 focus:ring-primary/5"
+            className="w-full rounded-2xl border border-[#f0f0f0] bg-[#f9f9f9] py-3.5 pl-12 pr-4 text-[15px] font-bold outline-none transition-all focus:bg-white focus:ring-4 focus:ring-primary/5"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -42,9 +43,9 @@ export default function ExplorePage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap rounded-lg px-4 py-1.5 text-[14px] font-bold transition-all active:scale-95 ${activeCategory === cat
-                ? "bg-black text-white"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+              className={`whitespace-nowrap rounded-full px-5 py-2 text-[13px] font-bold transition-all active:scale-95 ${activeCategory === cat
+                ? "bg-black text-white shadow-lg shadow-black/10"
+                : "bg-white border border-[#f0f0f0] text-muted-foreground hover:bg-muted/30"
                 }`}
             >
               {cat}
@@ -53,57 +54,26 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Modern Grid */}
-      <div className="grid gap-1 grid-cols-3 p-1">
-        {filteredEvents.map((event, idx) => (
-          <Link
-            key={event.id}
-            href={`/explore/event/${event.id}`}
-            className={cn(
-              "relative aspect-square overflow-hidden group bg-muted",
-              // Periodic large items like Instagram
-              idx % 10 === 0 && "col-span-2 row-span-2 aspect-auto h-full"
-            )}
-          >
-            {event.imageUrl ? (
-              <Image
-                src={event.imageUrl}
-                alt={event.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                No Image
-              </div>
-            )}
-
-            <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 flex flex-col justify-end p-4">
-              <h3 className="text-white text-xs font-bold truncate">{event.title}</h3>
-              <div className="flex items-center gap-2 text-white/80 text-[10px]">
-                <Flame className="h-2.5 w-2.5" />
-                <span>{formatNumber(event.participants)}</span>
-              </div>
-            </div>
-
-            {event.isTrending && (
-              <span className="absolute right-2 top-2 rounded-full bg-white/20 backdrop-blur-md p-1.5">
-                <Flame className="h-3 w-3 text-white" />
-              </span>
-            )}
-          </Link>
-        ))}
-      </div>
-
-      {filteredEvents.length === 0 && (
-        <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
-          <div className="rounded-full border-2 p-6">
-            <Search className="h-10 w-10 text-muted-foreground" />
-          </div>
-          <p className="font-bold text-muted-foreground">No results found</p>
+      {/* Single Column Feed Layout */}
+      <div className="px-6 py-8 max-w-2xl mx-auto">
+        <div className="flex flex-col gap-6">
+          {filteredEvents.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
         </div>
-      )}
+
+        {filteredEvents.length === 0 && (
+          <div className="flex h-[40vh] flex-col items-center justify-center space-y-4 text-center">
+            <div className="rounded-[32px] bg-muted/30 p-8">
+              <Search className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xl font-bold tracking-tight text-black">No results found</p>
+              <p className="text-sm font-medium text-muted-foreground">Try searching for something else in {currentCity?.name}</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MapPin, Users, Calendar, Navigation, Coffee, Dumbbell, Music, Zap } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { cn } from "@/lib/utils";
+import { AppHeader } from "@/components/layout/app-header";
 
 const filters = [
   { id: "all", label: "All", icon: MapPin },
@@ -34,15 +35,11 @@ export default function MapPage() {
   const nearbyCount = events.length;
 
   return (
-    <div>
-      <div className="sticky top-0 z-40 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-lg">
-        <MapPin className="h-5 w-5" style={{ color: "var(--tribe-primary)" }} />
-        <h1 className="text-lg font-bold">Map</h1>
-        <span className="text-sm text-muted-foreground">{currentCity?.name}</span>
-      </div>
+    <div className="bg-[#fcfcfc] min-h-screen">
+      <AppHeader title="Map" />
 
-      {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
+      {/* Filters Bar */}
+      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 flex gap-2 overflow-x-auto no-scrollbar border-b border-[#f0f0f0]">
         {filters.map((f) => {
           const Icon = f.icon;
           return (
@@ -50,97 +47,105 @@ export default function MapPage() {
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
               className={cn(
-                "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-2 whitespace-nowrap rounded-full px-5 py-2 text-[13px] font-bold transition-all active:scale-95",
                 activeFilter === f.id
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  ? "bg-black text-white shadow-lg shadow-black/10"
+                  : "bg-white border border-[#f0f0f0] text-muted-foreground hover:bg-muted/30"
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
               {f.label}
             </button>
           );
         })}
       </div>
 
-      {/* Map Area */}
-      <div className="relative mx-4 h-[calc(100vh-240px)] min-h-[400px] overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 dark:from-emerald-950/30 dark:via-blue-950/30 dark:to-indigo-950/30">
-        {/* Grid lines for map feel */}
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(8)].map((_, i) => (
-            <div key={`h-${i}`} className="absolute left-0 right-0 border-b border-foreground/20" style={{ top: `${(i + 1) * 12.5}%` }} />
-          ))}
-          {[...Array(8)].map((_, i) => (
-            <div key={`v-${i}`} className="absolute top-0 bottom-0 border-r border-foreground/20" style={{ left: `${(i + 1) * 12.5}%` }} />
-          ))}
-        </div>
-
-        {/* Roads */}
-        <div className="absolute inset-0 opacity-15">
-          <div className="absolute left-[20%] top-0 bottom-0 w-1 bg-foreground/30 rounded-full" />
-          <div className="absolute left-[50%] top-0 bottom-0 w-1.5 bg-foreground/40 rounded-full" />
-          <div className="absolute left-0 right-0 top-[45%] h-1.5 bg-foreground/40 rounded-full" />
-          <div className="absolute left-0 right-0 top-[75%] h-1 bg-foreground/30 rounded-full" />
-        </div>
-
-        {/* User Location */}
-        <div className="absolute z-20" style={{ left: "48%", top: "45%" }}>
-          <div className="relative">
-            <div className="absolute -inset-4 animate-ping rounded-full bg-indigo-500/20" />
-            <div className="absolute -inset-2 rounded-full bg-indigo-500/30" />
-            <div className="relative h-4 w-4 rounded-full border-2 border-white bg-indigo-500 shadow-lg" />
+      <div className="max-w-2xl mx-auto px-6 py-8">
+        {/* Map Area */}
+        <div className="relative h-[500px] overflow-hidden rounded-[40px] border border-[#f0f0f0] bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 shadow-sm shadow-black/5">
+          {/* Grid lines for map feel */}
+          <div className="absolute inset-0 opacity-10">
+            {[...Array(8)].map((_, i) => (
+              <div key={`h-${i}`} className="absolute left-0 right-0 border-b border-foreground/20" style={{ top: `${(i + 1) * 12.5}%` }} />
+            ))}
+            {[...Array(8)].map((_, i) => (
+              <div key={`v-${i}`} className="absolute top-0 bottom-0 border-r border-foreground/20" style={{ left: `${(i + 1) * 12.5}%` }} />
+            ))}
           </div>
-        </div>
 
-        {/* Pins */}
-        {filteredPins.map((pin) => {
-          const Icon = pin.icon;
-          const isSelected = selectedPin === pin.id;
-          return (
-            <button
-              key={pin.id}
-              onClick={() => setSelectedPin(isSelected ? null : pin.id)}
-              className="absolute z-10 transition-transform hover:scale-110"
-              style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-            >
-              <div className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full shadow-lg transition-all border-2 border-white",
-                isSelected && "scale-125 ring-2 ring-offset-1"
-              )} style={{ backgroundColor: pin.color }}>
-                <Icon className="h-4 w-4 text-white" />
-              </div>
-              {isSelected && (
-                <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-lg bg-background px-3 py-1.5 text-xs font-medium shadow-lg border">
-                  <p className="font-semibold">{pin.label}</p>
-                  <p className="text-muted-foreground">{pin.attendees} people</p>
+          {/* Roads */}
+          <div className="absolute inset-0 opacity-15">
+            <div className="absolute left-[20%] top-0 bottom-0 w-1 bg-foreground/30 rounded-full" />
+            <div className="absolute left-[50%] top-0 bottom-0 w-1.5 bg-foreground/40 rounded-full" />
+            <div className="absolute left-0 right-0 top-[45%] h-1.5 bg-foreground/40 rounded-full" />
+            <div className="absolute left-0 right-0 top-[75%] h-1 bg-foreground/30 rounded-full" />
+          </div>
+
+          {/* User Location */}
+          <div className="absolute z-20" style={{ left: "48%", top: "45%" }}>
+            <div className="relative">
+              <div className="absolute -inset-4 animate-ping rounded-full bg-primary/20" />
+              <div className="absolute -inset-2 rounded-full bg-primary/30" />
+              <div className="relative h-4 w-4 rounded-full border-2 border-white bg-primary shadow-lg" />
+            </div>
+          </div>
+
+          {/* Pins */}
+          {filteredPins.map((pin) => {
+            const Icon = pin.icon;
+            const isSelected = selectedPin === pin.id;
+            return (
+              <button
+                key={pin.id}
+                onClick={() => setSelectedPin(isSelected ? null : pin.id)}
+                className="absolute z-10 transition-transform hover:scale-110"
+                style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+              >
+                <div className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-[16px] shadow-lg transition-all border-2 border-white",
+                  isSelected && "scale-125 ring-4 ring-black/5"
+                )} style={{ backgroundColor: pin.color }}>
+                  <Icon className="h-4 w-4 text-white" />
                 </div>
-              )}
-            </button>
-          );
-        })}
+                {isSelected && (
+                  <div className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2 whitespace-nowrap rounded-[20px] bg-black text-white px-4 py-2 text-[12px] font-bold shadow-2xl">
+                    {pin.label}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
 
-        {/* Locate me button */}
-        <button className="absolute bottom-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-background shadow-lg border hover:bg-muted transition-colors">
-          <Navigation className="h-5 w-5" />
-        </button>
-      </div>
+          {/* Locate me button */}
+          <button className="absolute bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-xl border border-[#f0f0f0] hover:bg-[#f9f9f9] transition-all active:scale-90">
+            <Navigation className="h-6 w-6 text-black" />
+          </button>
+        </div>
 
-      {/* Bottom stats */}
-      <div className="grid grid-cols-3 gap-3 p-4">
-        <div className="rounded-xl border bg-background p-3 text-center">
-          <Users className="mx-auto mb-1 h-5 w-5 text-indigo-500" />
-          <p className="text-sm font-bold">8</p>
-          <p className="text-[10px] text-muted-foreground">Nearby</p>
-        </div>
-        <div className="rounded-xl border bg-background p-3 text-center">
-          <Calendar className="mx-auto mb-1 h-5 w-5 text-emerald-500" />
-          <p className="text-sm font-bold">{nearbyCount}</p>
-          <p className="text-[10px] text-muted-foreground">Events</p>
-        </div>
-        <div className="rounded-xl border bg-background p-3 text-center">
-          <Coffee className="mx-auto mb-1 h-5 w-5 text-orange-500" />
-          <p className="text-sm font-bold">4</p>
-          <p className="text-[10px] text-muted-foreground">Places</p>
+        {/* Bottom stats cards */}
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-4">
+              <Users className="h-5 w-5" />
+            </div>
+            <p className="text-xl font-black leading-none">8</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Nearby</p>
+          </div>
+          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-5 w-5" />
+            </div>
+            <p className="text-xl font-black leading-none">{nearbyCount}</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Events</p>
+          </div>
+          <div className="rounded-[32px] bg-white border border-[#f0f0f0] p-6 text-center shadow-sm hover:shadow-xl hover:shadow-black/[0.03] transition-all">
+            <div className="h-10 w-10 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center mx-auto mb-4">
+              <Coffee className="h-5 w-5" />
+            </div>
+            <p className="text-xl font-black leading-none">4</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2 font-mono">Places</p>
+          </div>
         </div>
       </div>
     </div>
