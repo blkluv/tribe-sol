@@ -142,6 +142,37 @@ export function useAuth() {
     [walletAddress, setStatus, setTapestryProfile, setError]
   );
 
+  const updateProfile = useCallback(
+    async (updates: { username?: string; bio?: string; image?: string }) => {
+      if (!tapestryProfile?.id) {
+        setError("No profile to update");
+        return;
+      }
+
+      try {
+        await apiFetch(
+          `/api/profiles/info?username=${encodeURIComponent(tapestryProfile.id)}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(updates),
+          }
+        );
+
+        // Update the local auth store with new values
+        setTapestryProfile({
+          ...tapestryProfile,
+          ...updates,
+        });
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update profile"
+        );
+        throw err;
+      }
+    },
+    [tapestryProfile, setTapestryProfile, setError]
+  );
+
   const login = useCallback(() => {
     setVisible(true);
   }, [setVisible]);
@@ -160,6 +191,7 @@ export function useAuth() {
     isConnected: connected && !!address,
     isConnecting,
     createProfile,
+    updateProfile,
     login,
     logout,
   };
