@@ -38,7 +38,7 @@ export function SidebarNav() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
-    <aside className="hidden h-screen flex-col bg-white sticky top-0 md:flex md:w-24 lg:w-72">
+    <aside className="hidden h-screen flex-col bg-white sticky top-0 md:flex md:w-24 lg:w-[600px]">
       <div className="flex px-6 py-12 lg:px-10">
         <Link href="/home" className="flex items-center gap-2">
           <span className="text-[28px] font-black tracking-[-1.5px] lg:block hidden group-hover:opacity-70 transition-opacity">tribe</span>
