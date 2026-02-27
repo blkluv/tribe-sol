@@ -14,9 +14,14 @@ export default function ExplorePage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filteredEvents = events.filter((e) =>
-    e.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredEvents = events
+    .filter((e) => e.title.toLowerCase().includes(search.toLowerCase()))
+    .filter((e) => {
+      if (activeCategory === "Events") return e.type === "event";
+      if (activeCategory === "Trending") return e.isTrending;
+      return true;
+    })
+    .sort((a, b) => activeCategory === "Nearby" ? b.participants - a.participants : 0);
 
   return (
     <div className="bg-background">
