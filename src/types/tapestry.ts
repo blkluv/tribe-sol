@@ -50,6 +50,8 @@ export interface TapestryComment {
   text: string;
   created_at: string;
   profile?: TapestryProfile;
+  replies?: TapestryComment[];
+  replyCount?: number;
 }
 
 export interface TapestryFollowUser {
