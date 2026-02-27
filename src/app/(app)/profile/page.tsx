@@ -57,8 +57,8 @@ function ActivityGrid() {
 
 export default function ProfilePage() {
   const { currentUser, updateCurrentUser } = useTribeStore();
-  const { isAuthenticated, profile: tapestryProfile, walletAddress } = useAuth();
-  const { profile: freshProfile } = useTapestryProfile(
+  const { isAuthenticated, profile: tapestryProfile, walletAddress, updateProfile } = useAuth();
+  const { profile: freshProfile, refetch: refetchProfile } = useTapestryProfile(
     isAuthenticated ? tapestryProfile?.id : null
   );
   const { share, showToast } = useShare();
@@ -90,8 +90,9 @@ export default function ProfilePage() {
     ? activeProfile.username
     : currentUser.displayName;
 
-  const displayBio = isAuthenticated && activeProfile?.bio
-    ? activeProfile.bio
+  // Prefer freshProfile bio (from API), then tapestryProfile bio (from auth store), then local fallback
+  const displayBio = isAuthenticated
+    ? (freshProfile?.bio || tapestryProfile?.bio || currentUser.bio)
     : currentUser.bio;
 
   const displayAddress = walletAddress
@@ -170,7 +171,12 @@ export default function ProfilePage() {
 
             <div className="flex gap-3 mt-10">
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setEditName(displayName || "");
+                  setEditBio(displayBio || "");
+                  setEditLocation(currentUser.location || "");
+                  setIsEditing(true);
+                }}
                 className="flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl bg-black text-white text-[14px] font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-black/10"
               >
                 Edit Profile
@@ -294,13 +300,30 @@ export default function ProfilePage() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    updateCurrentUser({ displayName: editName, bio: editBio });
-                    setIsEditing(false);
+                  disabled={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    try {
+                      // Update local store
+                      updateCurrentUser({ displayName: editName, bio: editBio });
+
+                      // Persist to Tapestry if authenticated
+                      if (isAuthenticated && tapestryProfile?.id) {
+                        await updateProfile({ bio: editBio });
+                        // Refetch fresh profile so UI reflects the update
+                        refetchProfile();
+                      }
+
+                      setIsEditing(false);
+                    } catch {
+                      // updateProfile sets error in auth store; keep modal open
+                    } finally {
+                      setIsSaving(false);
+                    }
                   }}
-                  className="flex-1 h-14 rounded-2xl bg-black text-white font-bold"
+                  className="flex-1 h-14 rounded-2xl bg-black text-white font-bold disabled:opacity-50"
                 >
-                  Save Pulse
+                  {isSaving ? "Saving…" : "Save Pulse"}
                 </button>
               </div>
             </div>
