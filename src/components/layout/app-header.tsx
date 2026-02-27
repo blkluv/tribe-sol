@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/tribe/wallet-button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { CitySwitcher } from "./city-switcher";
 
 interface AppHeaderProps {
     title?: string;
@@ -15,6 +17,7 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
     const { currentCity } = useTribeStore();
     const { profile } = useAuth();
     const router = useRouter();
+    const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
     return (
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
@@ -35,13 +38,13 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
                     <h1 className="text-xl font-bold tracking-tight leading-none">
                         {title || currentCity?.name || "Tribe"}
                     </h1>
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-1.5 mt-1.5 text-left">
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                             {currentCity?.name || "Local"}
                         </span>
                         <button
-                            onClick={() => {/* Trigger city switcher modal */ }}
-                            className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
+                            onClick={() => setIsSwitcherOpen(true)}
+                            className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity whitespace-nowrap"
                         >
                             (Change City)
                         </button>
@@ -57,6 +60,11 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
                     </span>
                 )}
             </div>
+
+            <CitySwitcher
+                isOpen={isSwitcherOpen}
+                onOpenChange={setIsSwitcherOpen}
+            />
         </div>
     );
 }

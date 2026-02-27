@@ -41,29 +41,9 @@ const iconMap: Record<string, string> = {
   "map-pin": "📍",
 };
 
-// Lazy-load cities data
-let citiesCache: City[] | null = null;
-async function getCities(): Promise<City[]> {
-  if (citiesCache) return citiesCache;
-  const mod = await import("@/data/cities");
-  citiesCache = mod.cities;
-  return mod.cities;
-}
-
 export function HomeFeed() {
-  const { casts, polls, events, tasks, crowdfunds, currentCity, tribes, switchCity, isSwitchingCity } = useTribeStore();
+  const { casts, polls, events, tasks, crowdfunds, currentCity, tribes } = useTribeStore();
   const { profile } = useAuth();
-  const [allCities, setAllCities] = useState<City[]>([]);
-
-  // Load cities list on first render
-  useState(() => {
-    getCities().then(setAllCities);
-  });
-
-  const handleCityChange = useCallback(async (city: City) => {
-    const data = await loadCityData(city);
-    switchCity(city, data);
-  }, [switchCity]);
 
   // Build mixed feed: interleave content types
   const feedItems: { type: string; data: any; key: string }[] = [];
