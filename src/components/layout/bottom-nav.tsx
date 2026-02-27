@@ -29,7 +29,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-4 sm:bottom-8 left-0 right-0 z-50 flex justify-center px-3 sm:px-6 md:hidden">
+    <div className="fixed bottom-4 sm:bottom-8 left-0 right-0 z-50 flex justify-center px-3 sm:px-6">
       <nav className="flex items-center gap-0.5 sm:gap-1.5 rounded-[32px] bg-black px-2 sm:px-3 py-2 sm:py-2.5 shadow-2xl shadow-black/20 ring-1 ring-white/10">
         {/* Left Tabs */}
         {leftTabs.map((tab) => {

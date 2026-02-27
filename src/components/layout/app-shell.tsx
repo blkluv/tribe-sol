@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 justify-center">
         <main className="w-full max-w-[800px] flex px-0 sm:px-4">
           <div className={cn(
-            "flex-1 w-full min-h-screen pb-28 sm:pb-32 md:pb-8 pt-0 bg-white transition-all duration-700",
+            "flex-1 w-full min-h-screen pb-28 sm:pb-32 pt-0 bg-white transition-all duration-700",
             isSwitchingCity ? "scale-95 blur-sm opacity-50" : "scale-100 blur-0 opacity-100"
           )}>
             {children}
@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <BottomNav />
 
       {toastMessage && (
-        <div className="fixed bottom-20 sm:bottom-24 md:bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black px-6 py-3 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-20 sm:bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-black px-6 py-3 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-4">
           {toastMessage}
         </div>
       )}
