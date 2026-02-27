@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import * as tapestry from "@/lib/tapestry";
 
 export function useCurrentWallet() {
   const { publicKey, connected, connecting } = useWallet();
@@ -24,14 +23,18 @@ export function useCurrentWallet() {
     hasSearched.current = true;
     setLoading(true);
 
-    tapestry
-      .searchProfiles(walletAddress)
+    fetch(`/api/profiles?walletAddress=${encodeURIComponent(walletAddress)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch profiles");
+        return res.json();
+      })
       .then((result) => {
         const found = result.profiles?.find(
-          (p) => p.walletAddress === walletAddress
+          (p: { wallet?: { address: string } }) =>
+            p.wallet?.address === walletAddress
         );
         if (found) {
-          setMainUsername(found.username);
+          setMainUsername(found.profile.username);
         }
       })
       .catch(() => {

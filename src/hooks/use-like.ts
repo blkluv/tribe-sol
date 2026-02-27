@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./use-auth";
-import * as tapestry from "@/lib/tapestry";
 
 interface UseLikeReturn {
   isLiked: boolean;
@@ -27,14 +26,12 @@ export function useLike(
     setLikeCount(initialCount);
   }, [initialLiked, initialCount]);
 
-  // Check initial like status from Tapestry
+  // Check initial like status — use content detail endpoint which includes hasLiked
   useEffect(() => {
     if (!isAuthenticated || !profile?.id || !contentId) return;
 
-    tapestry
-      .checkLikeStatus(profile.id, contentId)
-      .then((result) => setIsLiked(result.isLiked))
-      .catch(() => {});
+    // No direct "check like" endpoint in the SDK — we track locally from initial props
+    // The content detail endpoint can be used if requestingProfileId is passed
   }, [isAuthenticated, profile?.id, contentId]);
 
   const toggleLike = useCallback(async () => {
@@ -49,9 +46,25 @@ export function useLike(
     try {
       if (isAuthenticated && profile?.id) {
         if (wasLiked) {
-          await tapestry.unlikeContent(profile.id, contentId);
+          const res = await fetch("/api/likes", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nodeId: contentId,
+              startId: profile.id,
+            }),
+          });
+          if (!res.ok) throw new Error("Failed");
         } else {
-          await tapestry.likeContent(profile.id, contentId);
+          const res = await fetch("/api/likes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nodeId: contentId,
+              startId: profile.id,
+            }),
+          });
+          if (!res.ok) throw new Error("Failed");
         }
       }
     } catch {

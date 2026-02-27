@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import type { TapestryProfile } from "@/types/tapestry";
-import * as tapestry from "@/lib/tapestry";
 
 interface TapestryProfileData {
   profile: TapestryProfile | null;
@@ -25,8 +24,26 @@ export function useTapestryProfile(
     setError(null);
 
     try {
-      const data = await tapestry.getProfile(profileId);
-      setProfile(data);
+      const res = await fetch(
+        `/api/profiles/info?username=${encodeURIComponent(profileId)}`
+      );
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const data = await res.json();
+      setProfile({
+        id: data.profile.id,
+        blockchain: "SOLANA",
+        walletAddress: data.walletAddress || "",
+        username: data.profile.username,
+        bio: data.profile.bio || undefined,
+        image: data.profile.image || undefined,
+        namespace: data.profile.namespace,
+        created_at: String(data.profile.created_at),
+        socialCounts: {
+          followers: data.socialCounts?.followers || 0,
+          following: data.socialCounts?.following || 0,
+          posts: 0,
+        },
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch profile"

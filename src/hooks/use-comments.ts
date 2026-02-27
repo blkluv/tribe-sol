@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { useAuth } from "./use-auth";
-import * as tapestry from "@/lib/tapestry";
 import type { TapestryComment } from "@/types/tapestry";
 
 interface UseCommentsReturn {
@@ -29,9 +28,40 @@ export function useComments(contentId: string | null): UseCommentsReturn {
     setError(null);
 
     try {
-      const result = await tapestry.getComments(contentId);
-      setComments(result.comments || []);
-      setTotal(result.total || 0);
+      const res = await fetch(
+        `/api/comments?contentId=${encodeURIComponent(contentId)}`
+      );
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const data = await res.json();
+
+      // Map SDK response shape to our TapestryComment type
+      const mapped: TapestryComment[] = (data.comments || []).map(
+        (c: {
+          comment: { id: string; text: string; created_at: number };
+          contentId?: string;
+          author?: { id: string; username: string; bio?: string | null; image?: string | null; namespace: string; created_at: number };
+        }) => ({
+          id: c.comment.id,
+          profileId: c.author?.id || "",
+          contentId: c.contentId || contentId,
+          text: c.comment.text,
+          created_at: String(c.comment.created_at),
+          profile: c.author
+            ? {
+                id: c.author.id,
+                blockchain: "SOLANA",
+                walletAddress: "",
+                username: c.author.username,
+                bio: c.author.bio || undefined,
+                image: c.author.image || undefined,
+                namespace: c.author.namespace,
+                created_at: String(c.author.created_at),
+              }
+            : undefined,
+        })
+      );
+      setComments(mapped);
+      setTotal(mapped.length);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load comments"
@@ -48,11 +78,25 @@ export function useComments(contentId: string | null): UseCommentsReturn {
       setIsLoading(true);
 
       try {
-        const newComment = await tapestry.createComment(
-          profile.id,
+        const res = await fetch("/api/comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: profile.id,
+            contentId,
+            text: text.trim(),
+          }),
+        });
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const data = await res.json();
+
+        const newComment: TapestryComment = {
+          id: data.id,
+          profileId: profile.id,
           contentId,
-          text.trim()
-        );
+          text: data.text,
+          created_at: String(data.created_at),
+        };
         setComments((prev) => [...prev, newComment]);
         setTotal((t) => t + 1);
       } catch (err) {
@@ -72,7 +116,11 @@ export function useComments(contentId: string | null): UseCommentsReturn {
       setTotal((t) => Math.max(0, t - 1));
 
       try {
-        await tapestry.deleteComment(commentId);
+        const res = await fetch(
+          `/api/comments?id=${encodeURIComponent(commentId)}`,
+          { method: "DELETE" }
+        );
+        if (!res.ok) throw new Error("Failed");
       } catch {
         // Refetch on failure to restore correct state
         fetchComments();

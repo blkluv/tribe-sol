@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./use-auth";
-import * as tapestry from "@/lib/tapestry";
 
 interface UseFollowReturn {
   isFollowing: boolean;
@@ -20,8 +19,13 @@ export function useFollow(targetProfileId: string | null): UseFollowReturn {
     if (!isAuthenticated || !profile?.id || !targetProfileId) return;
     if (profile.id === targetProfileId) return;
 
-    tapestry
-      .checkFollowStatus(profile.id, targetProfileId)
+    fetch(
+      `/api/followers/state?startId=${encodeURIComponent(profile.id)}&endId=${encodeURIComponent(targetProfileId)}`
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed");
+        return res.json();
+      })
       .then((result) => setIsFollowing(result.isFollowing))
       .catch(() => {});
   }, [isAuthenticated, profile?.id, targetProfileId]);
@@ -35,11 +39,18 @@ export function useFollow(targetProfileId: string | null): UseFollowReturn {
     setIsLoading(true);
 
     try {
-      if (wasFollowing) {
-        await tapestry.unfollowUser(profile.id, targetProfileId);
-      } else {
-        await tapestry.followUser(profile.id, targetProfileId);
-      }
+      const endpoint = wasFollowing
+        ? "/api/followers/remove"
+        : "/api/followers/add";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startId: profile.id,
+          endId: targetProfileId,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
     } catch {
       // Rollback on failure
       setIsFollowing(wasFollowing);
