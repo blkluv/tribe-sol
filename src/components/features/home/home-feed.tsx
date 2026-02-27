@@ -1,16 +1,40 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import Image from "next/image";
-import { Plus, Heart, MessageCircle, Share2, Bookmark, Coins } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
+import { CityHeader } from "@/components/tribe/city-header";
+import { loadCityData } from "@/lib/city-data";
+import type { City } from "@/types";
 import { CastCard } from "./cast-card";
 import { PollCard } from "./poll-card";
 import { EventCard } from "./event-card";
 import { TaskCard } from "./task-card";
 import { CrowdfundCard } from "./crowdfund-card";
 
+// Lazy-load cities data
+let citiesCache: City[] | null = null;
+async function getCities(): Promise<City[]> {
+  if (citiesCache) return citiesCache;
+  const mod = await import("@/data/cities");
+  citiesCache = mod.cities;
+  return mod.cities;
+}
+
 export function HomeFeed() {
-  const { casts, polls, events, tasks, crowdfunds, currentCity, tribes } = useTribeStore();
+  const { casts, polls, events, tasks, crowdfunds, currentCity, tribes, switchCity, isSwitchingCity } = useTribeStore();
+  const [allCities, setAllCities] = useState<City[]>([]);
+
+  // Load cities list on first render
+  useState(() => {
+    getCities().then(setAllCities);
+  });
+
+  const handleCityChange = useCallback(async (city: City) => {
+    const data = await loadCityData(city);
+    switchCity(city, data);
+  }, [switchCity]);
 
   // Build mixed feed: interleave content types
   const feedItems: { type: string; data: unknown; key: string }[] = [];
@@ -55,21 +79,28 @@ export function HomeFeed() {
   return (
     <div className="pb-20">
       {/* City Header */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-white/95 px-4 py-3 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: currentCity.accentColor }} />
-          <h1 className="text-xl font-black tracking-tight">{currentCity.name}</h1>
-        </div>
-        <button className="text-xs font-black uppercase tracking-widest text-muted-foreground">Switch</button>
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-2 py-2 backdrop-blur-md">
+        <CityHeader
+          city={currentCity}
+          cities={allCities}
+          onCityChange={handleCityChange}
+        />
       </div>
 
+      {/* City switching overlay */}
+      {isSwitchingCity && (
+        <div className="flex h-32 items-center justify-center">
+          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+        </div>
+      )}
+
       {/* Stories / Tribes Bar */}
-      <div className="border-b bg-white overflow-hidden py-4">
+      <div className="border-b bg-background overflow-hidden py-4">
         <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
           {tribes.map((tribe) => (
             <button key={tribe.id} className="flex flex-col items-center gap-1.5 flex-none group">
               <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 transition-transform active:scale-90 group-hover:scale-105">
-                <div className="h-16 w-16 rounded-full border-2 border-white bg-muted overflow-hidden relative">
+                <div className="h-16 w-16 rounded-full border-2 border-background bg-muted overflow-hidden relative">
                   {tribe.imageUrl ? (
                     <Image src={tribe.imageUrl} alt={tribe.name} fill className="object-cover" />
                   ) : (

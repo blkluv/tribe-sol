@@ -66,6 +66,9 @@ interface TribeStore {
   // Event actions
   addEvent: (event: ExploreItem) => void;
 
+  // User actions
+  updateCurrentUser: (updates: Partial<User>) => void;
+
   // Tapestry bridge
   setTapestryProfileId: (id: string | null) => void;
 }
@@ -113,7 +116,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
   },
 
   likeCast: (castId) => {
-    // Optimistic local update
+    // Optimistic local update only — Tapestry sync handled by useLike hook
     const cast = get().casts.find((c) => c.id === castId);
     const wasLiked = cast?.isLiked;
     set((state) => ({
@@ -133,39 +136,8 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
           user: cast.user.displayName,
           avatar: cast.user.avatarUrl,
           message: `Your post "${cast.caption.slice(0, 40)}..." got a new like`,
+          href: "/home",
         });
-      }
-    }
-
-    // Async Tapestry bridge
-    const authState = useAuthStore.getState();
-    const profileId = authState.tapestryProfile?.id;
-    if (profileId) {
-      const cast = get().casts.find((c) => c.id === castId);
-      if (cast) {
-        if (cast.isLiked) {
-          // It was just liked (toggled from not liked)
-          tapestry.likeContent(profileId, castId).catch(() => {
-            // Rollback on failure
-            set((state) => ({
-              casts: state.casts.map((c) =>
-                c.id === castId
-                  ? { ...c, isLiked: false, likes: c.likes - 1 }
-                  : c
-              ),
-            }));
-          });
-        } else {
-          tapestry.unlikeContent(profileId, castId).catch(() => {
-            set((state) => ({
-              casts: state.casts.map((c) =>
-                c.id === castId
-                  ? { ...c, isLiked: true, likes: c.likes + 1 }
-                  : c
-              ),
-            }));
-          });
-        }
       }
     }
   },
@@ -192,6 +164,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
         user: cast.user.displayName,
         avatar: cast.user.avatarUrl,
         message: `received a ${amount} SOL tip on "${cast.caption.slice(0, 30)}..."`,
+        href: "/wallet",
       });
     }
   },
@@ -199,7 +172,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
   addCast: (cast) => {
     set((state) => ({ casts: [cast, ...state.casts] }));
 
-    // Async Tapestry bridge
+    // Async Tapestry bridge — capture content ID
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
@@ -211,6 +184,14 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
           { key: "imageUrl", value: cast.imageUrl },
           ...(city ? [{ key: "cityId", value: city.id }] : []),
         ])
+        .then((content) => {
+          // Store the Tapestry content ID back on the cast
+          set((state) => ({
+            casts: state.casts.map((c) =>
+              c.id === cast.id ? { ...c, tapestryContentId: content.id } : c
+            ),
+          }));
+        })
         .catch(() => {
           console.warn("Failed to persist cast to Tapestry");
         });
@@ -230,14 +211,76 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
       ),
     })),
 
-  addPoll: (poll) =>
-    set((state) => ({ polls: [poll, ...state.polls] })),
+  addPoll: (poll) => {
+    set((state) => ({ polls: [poll, ...state.polls] }));
 
-  addTask: (task) =>
-    set((state) => ({ tasks: [task, ...state.tasks] })),
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      tapestry
+        .createContent(profileId, [
+          { key: "type", value: "poll" },
+          { key: "question", value: poll.question },
+          { key: "options", value: JSON.stringify(poll.options) },
+        ])
+        .then((content) => {
+          set((state) => ({
+            polls: state.polls.map((p) =>
+              p.id === poll.id ? { ...p, tapestryContentId: content.id } : p
+            ),
+          }));
+        })
+        .catch(() => {});
+    }
+  },
 
-  addCrowdfund: (crowdfund) =>
-    set((state) => ({ crowdfunds: [crowdfund, ...state.crowdfunds] })),
+  addTask: (task) => {
+    set((state) => ({ tasks: [task, ...state.tasks] }));
+
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      tapestry
+        .createContent(profileId, [
+          { key: "type", value: "task" },
+          { key: "title", value: task.title },
+          { key: "description", value: task.description },
+          { key: "location", value: task.location },
+        ])
+        .then((content) => {
+          set((state) => ({
+            tasks: state.tasks.map((t) =>
+              t.id === task.id ? { ...t, tapestryContentId: content.id } : t
+            ),
+          }));
+        })
+        .catch(() => {});
+    }
+  },
+
+  addCrowdfund: (crowdfund) => {
+    set((state) => ({ crowdfunds: [crowdfund, ...state.crowdfunds] }));
+
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      tapestry
+        .createContent(profileId, [
+          { key: "type", value: "crowdfund" },
+          { key: "title", value: crowdfund.title },
+          { key: "description", value: crowdfund.description },
+          { key: "goal", value: String(crowdfund.goal) },
+        ])
+        .then((content) => {
+          set((state) => ({
+            crowdfunds: state.crowdfunds.map((cf) =>
+              cf.id === crowdfund.id ? { ...cf, tapestryContentId: content.id } : cf
+            ),
+          }));
+        })
+        .catch(() => {});
+    }
+  },
 
   joinTribe: (tribeId) => {
     const tribe = get().tribes.find((t) => t.id === tribeId);
@@ -252,6 +295,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
         user: tribe.name,
         avatar: tribe.imageUrl || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=100&h=100&fit=crop",
         message: `You joined ${tribe.name}`,
+        href: `/tribes/${tribeId}`,
       });
     }
   },
@@ -266,8 +310,35 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
   addTribe: (tribe) =>
     set((state) => ({ tribes: [tribe, ...state.tribes] })),
 
-  addEvent: (event) =>
-    set((state) => ({ events: [event, ...state.events] })),
+  addEvent: (event) => {
+    set((state) => ({ events: [event, ...state.events] }));
+
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      tapestry
+        .createContent(profileId, [
+          { key: "type", value: "event" },
+          { key: "title", value: event.title },
+          { key: "description", value: event.description },
+          { key: "location", value: event.location },
+          { key: "cityId", value: event.cityId },
+        ])
+        .then((content) => {
+          set((state) => ({
+            events: state.events.map((e) =>
+              e.id === event.id ? { ...e, tapestryContentId: content.id } : e
+            ),
+          }));
+        })
+        .catch(() => {});
+    }
+  },
+
+  updateCurrentUser: (updates) =>
+    set((state) => ({
+      currentUser: state.currentUser ? { ...state.currentUser, ...updates } : null,
+    })),
 
   setTapestryProfileId: (id) => set({ tapestryProfileId: id }),
 }));

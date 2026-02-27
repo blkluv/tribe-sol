@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Heart, MessageCircle, UserPlus, Calendar, Hash, Coins, Users, CheckCircle } from "lucide-react";
 import { useNotificationStore } from "@/store/use-notification-store";
 
@@ -25,7 +26,15 @@ const colorMap: Record<string, string> = {
 };
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, markAllRead } = useNotificationStore();
+  const router = useRouter();
+  const { notifications, unreadCount, markAllRead, markRead } = useNotificationStore();
+
+  const handleNotifClick = (id: string, href?: string) => {
+    markRead(id);
+    if (href) {
+      router.push(href);
+    }
+  };
 
   return (
     <div>
@@ -55,9 +64,10 @@ export default function NotificationsPage() {
           const colorClass = colorMap[notif.type] || colorMap.like;
 
           return (
-            <div
+            <button
               key={notif.id}
-              className={`flex items-start gap-3 border-b px-4 py-3 transition-colors ${
+              onClick={() => handleNotifClick(notif.id, notif.href)}
+              className={`flex w-full items-start gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/30 ${
                 !notif.isRead ? "bg-indigo-50/50 dark:bg-indigo-500/5" : ""
               }`}
             >
@@ -77,12 +87,19 @@ export default function NotificationsPage() {
                 <p className="text-xs text-muted-foreground">{notif.time}</p>
               </div>
               {!notif.isRead && (
-                <div className="mt-2 h-2 w-2 rounded-full bg-indigo-500" />
+                <div className="mt-2 h-2 w-2 flex-none rounded-full bg-indigo-500" />
               )}
-            </div>
+            </button>
           );
         })}
       </div>
+
+      {notifications.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <p className="text-sm font-bold text-muted-foreground">No notifications yet</p>
+          <p className="text-xs text-muted-foreground/70">Interactions will show up here</p>
+        </div>
+      )}
     </div>
   );
 }

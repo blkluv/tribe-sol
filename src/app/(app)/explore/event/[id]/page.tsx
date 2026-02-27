@@ -5,12 +5,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Users, Calendar, Share2 } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
+import { useShare } from "@/hooks/use-share";
 import { formatNumber } from "@/lib/utils";
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { events } = useTribeStore();
+  const { share, showToast } = useShare();
   const event = events.find((e) => e.id === id);
 
   if (!event) {
@@ -29,7 +31,14 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="flex-1 text-lg font-bold">Event Details</h1>
-        <button className="rounded-full p-2 hover:bg-muted">
+        <button
+          onClick={() => share(
+            event.title,
+            event.description,
+            `${typeof window !== "undefined" ? window.location.origin : ""}/explore/event/${id}`
+          )}
+          className="rounded-full p-2 hover:bg-muted"
+        >
           <Share2 className="h-5 w-5" />
         </button>
       </div>
@@ -79,6 +88,12 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           RSVP - I&apos;m Going
         </button>
       </div>
+
+      {showToast && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg animate-in fade-in slide-in-from-bottom-4">
+          Link copied!
+        </div>
+      )}
     </div>
   );
 }

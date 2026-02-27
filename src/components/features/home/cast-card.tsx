@@ -9,6 +9,7 @@ import { cn, formatNumber } from "@/lib/utils";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { useLike } from "@/hooks/use-like";
 import { useTip } from "@/hooks/use-tip";
+import { useShare } from "@/hooks/use-share";
 import { useAuth } from "@/hooks/use-auth";
 import { FollowButton } from "@/components/tribe/follow-button";
 import { TipButton } from "@/components/tribe/tip-button";
@@ -21,12 +22,14 @@ interface CastCardProps {
 export function CastCard({ cast }: CastCardProps) {
   const { likeCast, bookmarkCast, tipCast } = useTribeStore();
   const { isAuthenticated } = useAuth();
+  const tapestryId = cast.tapestryContentId || null;
   const { isLiked, likeCount, toggleLike } = useLike(
-    cast.id,
+    tapestryId,
     cast.isLiked,
     cast.likes
   );
   const { sendTip, isWalletReady } = useTip();
+  const { share, showToast: showShareToast } = useShare();
   const [showComments, setShowComments] = useState(false);
 
   const handleTip = async (amount: number) => {
@@ -118,7 +121,14 @@ export function CastCard({ cast }: CastCardProps) {
             >
               <MessageCircle className="h-7 w-7 stroke-[2px]" />
             </button>
-            <button className="transition-colors hover:opacity-70">
+            <button
+              onClick={() => share(
+                `${cast.user.username} on Tribe`,
+                cast.caption.slice(0, 100),
+                `${typeof window !== "undefined" ? window.location.origin : ""}/home#${cast.id}`
+              )}
+              className="transition-colors hover:opacity-70"
+            >
               <Share2 className="h-7 w-7 stroke-[2px]" />
             </button>
           </div>
@@ -170,11 +180,18 @@ export function CastCard({ cast }: CastCardProps) {
       </div>
 
       <CommentSheet
-        contentId={cast.id}
+        contentId={tapestryId}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
         localCommentCount={cast.comments.length}
       />
+
+      {/* Share toast */}
+      {showShareToast && (
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg animate-in fade-in slide-in-from-bottom-4">
+          Link copied!
+        </div>
+      )}
     </>
   );
 }
