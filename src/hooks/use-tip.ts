@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
 import {
   PublicKey,
   Transaction,
@@ -26,6 +27,11 @@ export interface TipRecord {
 // In-memory tip history (persists for current session)
 let tipHistory: TipRecord[] = [];
 
+/** Read tip history without needing wallet context */
+export function getTipHistory(): TipRecord[] {
+  return tipHistory;
+}
+
 export function useTip() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -33,13 +39,15 @@ export function useTip() {
   const [lastSignature, setLastSignature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const walletAddress = publicKey?.toBase58() ?? null;
+
   const sendTip = useCallback(
     async (
       castId: string,
       amountSOL: number,
       recipientName: string
     ): Promise<{ success: boolean; signature?: string }> => {
-      if (!publicKey || !sendTransaction) {
+      if (!publicKey) {
         setError("Wallet not connected");
         return { success: false };
       }
