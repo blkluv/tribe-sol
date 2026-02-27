@@ -155,7 +155,27 @@ export default function CreatePage() {
 
   if (mode === "cast") {
     return (
-      <FormLayout title="Broadcast" onSubmit={() => {/* Logic */ }} canSubmit={!!caption.trim()}>
+      <FormLayout title="Broadcast" onSubmit={() => {
+          if (!caption.trim() || !currentUser || !currentCity) return;
+          setIsSubmitting(true);
+          const newCast: Cast = {
+            id: `cast-${Date.now()}`,
+            user: currentUser,
+            caption: caption.trim(),
+            ...(selectedImage ? { imageUrl: selectedImage } : {}),
+            likes: 0,
+            comments: [],
+            timestamp: "Just now",
+            isLiked: false,
+            isSaved: false,
+            tipCount: 0,
+            totalTips: 0,
+            cityId: currentCity.id,
+          };
+          addCast(newCast);
+          setIsSubmitting(false);
+          router.push("/home");
+        }} canSubmit={!!caption.trim()}>
         <div className="space-y-6">
           <textarea
             placeholder="What's happening in your neighborhood?"

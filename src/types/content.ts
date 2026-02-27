@@ -9,7 +9,7 @@ export interface Comment {
 export interface Cast {
   id: string;
   user: User;
-  imageUrl: string;
+  imageUrl?: string;
   likes: number;
   caption: string;
   comments: Comment[];
