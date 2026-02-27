@@ -4,6 +4,7 @@ import { create } from "zustand";
 import type { City, Cast, Poll, Task, Crowdfund, Tribe, ExploreItem, User } from "@/types";
 import { useAuthStore } from "./use-auth-store";
 import { useNotificationStore } from "./use-notification-store";
+import { useUIStore } from "./use-ui-store";
 
 interface TribeStore {
   // State
@@ -171,7 +172,7 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
   addCast: (cast) => {
     set((state) => ({ casts: [cast, ...state.casts] }));
 
-    // Async Tapestry bridge — capture content ID
+    // Sync to Tapestry via findOrCreate
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
@@ -180,29 +181,33 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: `cast-${cast.id}`,
+          id: cast.id,
           profileId,
           properties: [
             { key: "type", value: "cast" },
             { key: "caption", value: cast.caption },
-            { key: "imageUrl", value: cast.imageUrl },
+            ...(cast.imageUrl ? [{ key: "imageUrl", value: cast.imageUrl }] : []),
             ...(city ? [{ key: "cityId", value: city.id }] : []),
           ],
         }),
       })
         .then((res) => {
-          if (!res.ok) throw new Error("Failed");
+          if (!res.ok) throw new Error(`API ${res.status}`);
           return res.json();
         })
-        .then((content) => {
-          set((state) => ({
-            casts: state.casts.map((c) =>
-              c.id === cast.id ? { ...c, tapestryContentId: content.id } : c
-            ),
-          }));
+        .then((data) => {
+          const contentId = data?.id;
+          if (contentId) {
+            set((state) => ({
+              casts: state.casts.map((c) =>
+                c.id === cast.id ? { ...c, tapestryContentId: contentId } : c
+              ),
+            }));
+          }
+          useUIStore.getState().showToast("Post synced to Tapestry");
         })
         .catch(() => {
-          console.warn("Failed to persist cast to Tapestry");
+          useUIStore.getState().showToast("Failed to sync post to Tapestry");
         });
     }
   },

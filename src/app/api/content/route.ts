@@ -3,6 +3,10 @@ import { socialfi } from "@/utils/socialfi";
 
 const apiKey = process.env.TAPESTRY_API_KEY || "";
 
+/**
+ * GET /api/content?profileId=...
+ * Fetches a user's posts from Tapestry: GET /contents?profileId=...
+ */
 export async function GET(req: NextRequest) {
   const profileId = req.nextUrl.searchParams.get("profileId") || undefined;
   const page = req.nextUrl.searchParams.get("page") || undefined;
@@ -25,6 +29,10 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * POST /api/content
+ * Creates content on Tapestry: POST /contents/findOrCreate
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
