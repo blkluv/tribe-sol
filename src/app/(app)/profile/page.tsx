@@ -8,6 +8,7 @@ import { useTribeStore } from "@/store/use-tribe-store";
 import { CastCard } from "@/components/features/home/cast-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useTapestryProfile } from "@/hooks/use-tapestry-profile";
+import { useTapestryPosts } from "@/hooks/use-tapestry-posts";
 import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
 import { cn, formatNumber } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -16,28 +17,38 @@ import { AppHeader } from "@/components/layout/app-header";
 
 const tabs = ["Posts", "Media", "Badges", "Stats"];
 
-function ActivityGrid() {
-  const { casts } = useTribeStore();
-  const userCasts = casts.filter((c) => c.imageUrl).slice(0, 9);
+import type { Cast } from "@/types";
+import { Loader2 } from "lucide-react";
 
-  if (userCasts.length === 0) {
+function ActivityGrid({ casts, isLoading }: { casts: Cast[]; isLoading?: boolean }) {
+  const mediaCasts = casts.filter((c) => c.imageUrl).slice(0, 9);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (mediaCasts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="rounded-[32px] bg-muted/30 p-8 mb-6">
           <Award className="h-10 w-10 text-muted-foreground/30" />
         </div>
-        <p className="text-xl font-bold tracking-tight text-black">No posts yet</p>
-        <p className="text-sm font-medium text-muted-foreground mt-1">Start sharing your local journey</p>
+        <p className="text-xl font-bold tracking-tight text-black">No media yet</p>
+        <p className="text-sm font-medium text-muted-foreground mt-1">Share photos from your local journey</p>
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-3 gap-2 px-6 pb-20">
-      {userCasts.map((cast) => (
+      {mediaCasts.map((cast) => (
         <div key={cast.id} className="group relative aspect-square overflow-hidden rounded-[20px] bg-muted border border-[#f0f0f0]">
           <Image
-            src={cast.imageUrl}
+            src={cast.imageUrl!}
             alt={cast.caption}
             fill
             className="object-cover transition-transform group-hover:scale-110 duration-500"
@@ -56,13 +67,18 @@ function ActivityGrid() {
   );
 }
 
-function PostsFeed() {
-  const { casts, currentUser } = useTribeStore();
-  const userCasts = currentUser
-    ? casts.filter((c) => c.user.id === currentUser.id)
-    : [];
+function PostsFeed({ casts, isLoading }: { casts: Cast[]; isLoading?: boolean }) {
+  const textCasts = casts.filter((c) => !c.imageUrl);
 
-  if (userCasts.length === 0) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (textCasts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="rounded-[32px] bg-muted/30 p-8 mb-6">
@@ -76,7 +92,7 @@ function PostsFeed() {
 
   return (
     <div className="flex flex-col gap-4 px-6 pb-24">
-      {userCasts.map((cast) => (
+      {textCasts.map((cast) => (
         <CastCard key={cast.id} cast={cast} />
       ))}
     </div>
@@ -87,6 +103,9 @@ export default function ProfilePage() {
   const { currentUser, updateCurrentUser } = useTribeStore();
   const { isAuthenticated, profile: tapestryProfile, walletAddress, updateProfile } = useAuth();
   const { profile: freshProfile, refetch: refetchProfile } = useTapestryProfile(
+    isAuthenticated ? tapestryProfile?.id : null
+  );
+  const { posts: tapestryPosts, isLoading: postsLoading } = useTapestryPosts(
     isAuthenticated ? tapestryProfile?.id : null
   );
   const { share, showToast } = useShare();
@@ -272,8 +291,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Content Area */}
-        {activeTab === "Posts" && <PostsFeed />}
-        {activeTab === "Media" && <ActivityGrid />}
+        {activeTab === "Posts" && <PostsFeed casts={tapestryPosts} isLoading={postsLoading} />}
+        {activeTab === "Media" && <ActivityGrid casts={tapestryPosts} isLoading={postsLoading} />}
 
         {activeTab === "Badges" && (
           <div className="grid grid-cols-2 gap-4 px-6 pb-24">
