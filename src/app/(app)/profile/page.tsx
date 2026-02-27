@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Settings, MapPin, BadgeCheck, Star, Award, PlusCircle, Wallet, Heart, MessageCircle, Share2, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { useTribeStore } from "@/store/use-tribe-store";
+import { CastCard } from "@/components/features/home/cast-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useTapestryProfile } from "@/hooks/use-tapestry-profile";
 import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
@@ -13,7 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { useShare } from "@/hooks/use-share";
 import { AppHeader } from "@/components/layout/app-header";
 
-const tabs = ["Activity", "Badges", "Stats"];
+const tabs = ["Posts", "Media", "Badges", "Stats"];
 
 function ActivityGrid() {
   const { casts } = useTribeStore();
@@ -55,6 +56,33 @@ function ActivityGrid() {
   );
 }
 
+function PostsFeed() {
+  const { casts, currentUser } = useTribeStore();
+  const userCasts = currentUser
+    ? casts.filter((c) => c.user.id === currentUser.id)
+    : [];
+
+  if (userCasts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="rounded-[32px] bg-muted/30 p-8 mb-6">
+          <MessageCircle className="h-10 w-10 text-muted-foreground/30" />
+        </div>
+        <p className="text-xl font-bold tracking-tight text-black">No posts yet</p>
+        <p className="text-sm font-medium text-muted-foreground mt-1">Share your thoughts with the community</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4 px-6 pb-24">
+      {userCasts.map((cast) => (
+        <CastCard key={cast.id} cast={cast} />
+      ))}
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { currentUser, updateCurrentUser } = useTribeStore();
   const { isAuthenticated, profile: tapestryProfile, walletAddress, updateProfile } = useAuth();
@@ -62,7 +90,7 @@ export default function ProfilePage() {
     isAuthenticated ? tapestryProfile?.id : null
   );
   const { share, showToast } = useShare();
-  const [activeTab, setActiveTab] = useState("Activity");
+  const [activeTab, setActiveTab] = useState("Posts");
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -244,7 +272,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Content Area */}
-        {activeTab === "Activity" && <ActivityGrid />}
+        {activeTab === "Posts" && <PostsFeed />}
+        {activeTab === "Media" && <ActivityGrid />}
 
         {activeTab === "Badges" && (
           <div className="grid grid-cols-2 gap-4 px-6 pb-24">

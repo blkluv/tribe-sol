@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/tribe/wallet-button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Bell } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useNotificationStore } from "@/store/use-notification-store";
 import { CitySwitcher } from "./city-switcher";
 
 interface AppHeaderProps {
@@ -17,6 +19,7 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
     const { currentCity } = useTribeStore();
     const { profile } = useAuth();
     const router = useRouter();
+    const unreadCount = useNotificationStore((s) => s.unreadCount);
     const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
     return (
@@ -52,13 +55,26 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
                 </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1.5">
-                <WalletButton className="h-10 rounded-xl px-4 text-xs font-bold" />
-                {profile && (
-                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                        @{profile.username}
-                    </span>
-                )}
+            <div className="flex items-center gap-2">
+                <Link
+                    href="/notifications"
+                    className="relative h-10 w-10 flex items-center justify-center rounded-xl bg-[#f5f5f5] hover:bg-[#eeeeee] transition-colors"
+                >
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white ring-2 ring-white">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                    )}
+                </Link>
+                <div className="flex flex-col items-end gap-1.5">
+                    <WalletButton className="h-10 rounded-xl px-4 text-xs font-bold" />
+                    {profile && (
+                        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                            @{profile.username}
+                        </span>
+                    )}
+                </div>
             </div>
 
             <CitySwitcher
