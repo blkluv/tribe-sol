@@ -4,6 +4,7 @@ import { create } from "zustand";
 import type { City, Cast, Poll, Task, Crowdfund, Tribe, ExploreItem, User } from "@/types";
 import * as tapestry from "@/lib/tapestry";
 import { useAuthStore } from "./use-auth-store";
+import { useNotificationStore } from "./use-notification-store";
 
 interface TribeStore {
   // State
@@ -113,6 +114,8 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
 
   likeCast: (castId) => {
     // Optimistic local update
+    const cast = get().casts.find((c) => c.id === castId);
+    const wasLiked = cast?.isLiked;
     set((state) => ({
       casts: state.casts.map((c) =>
         c.id === castId
@@ -120,6 +123,19 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
           : c
       ),
     }));
+
+    // Push notification for likes on others' posts
+    if (cast && !wasLiked) {
+      const currentUser = get().currentUser;
+      if (currentUser && cast.user.id !== currentUser.id) {
+        useNotificationStore.getState().addNotification({
+          type: "like",
+          user: cast.user.displayName,
+          avatar: cast.user.avatarUrl,
+          message: `Your post "${cast.caption.slice(0, 40)}..." got a new like`,
+        });
+      }
+    }
 
     // Async Tapestry bridge
     const authState = useAuthStore.getState();
@@ -161,14 +177,24 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
       ),
     })),
 
-  tipCast: (castId, amount) =>
+  tipCast: (castId, amount) => {
+    const cast = get().casts.find((c) => c.id === castId);
     set((state) => ({
       casts: state.casts.map((c) =>
         c.id === castId
           ? { ...c, tipCount: c.tipCount + 1, totalTips: c.totalTips + amount }
           : c
       ),
-    })),
+    }));
+    if (cast) {
+      useNotificationStore.getState().addNotification({
+        type: "tip",
+        user: cast.user.displayName,
+        avatar: cast.user.avatarUrl,
+        message: `received a ${amount} SOL tip on "${cast.caption.slice(0, 30)}..."`,
+      });
+    }
+  },
 
   addCast: (cast) => {
     set((state) => ({ casts: [cast, ...state.casts] }));
@@ -213,12 +239,22 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
   addCrowdfund: (crowdfund) =>
     set((state) => ({ crowdfunds: [crowdfund, ...state.crowdfunds] })),
 
-  joinTribe: (tribeId) =>
+  joinTribe: (tribeId) => {
+    const tribe = get().tribes.find((t) => t.id === tribeId);
     set((state) => ({
       tribes: state.tribes.map((t) =>
         t.id === tribeId ? { ...t, isJoined: true } : t
       ),
-    })),
+    }));
+    if (tribe) {
+      useNotificationStore.getState().addNotification({
+        type: "join",
+        user: tribe.name,
+        avatar: tribe.imageUrl || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=100&h=100&fit=crop",
+        message: `You joined ${tribe.name}`,
+      });
+    }
+  },
 
   leaveTribe: (tribeId) =>
     set((state) => ({
