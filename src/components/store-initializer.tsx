@@ -31,7 +31,9 @@ export function StoreInitializer() {
         { crowdfunds },
         { tribes },
       ]) => {
-        const city = cities[0]; // Bangalore default
+        const savedCityId = localStorage.getItem("tribe-selected-city");
+        const city = cities.find(c => c.id === savedCityId) || cities[0]; // Fallback to Bangalore
+
         setInitialData({
           city,
           user: currentUser,

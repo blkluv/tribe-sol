@@ -5,63 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Search, MapPin, Check } from "lucide-react";
-
-const cities = [
-  {
-    id: "bangalore",
-    name: "Bangalore",
-    country: "India",
-    emoji: "🇮🇳",
-    members: "15K+",
-    color: "#6366F1",
-    imageUrl: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=400&h=400&fit=crop",
-  },
-  {
-    id: "mumbai",
-    name: "Mumbai",
-    country: "India",
-    emoji: "🇮🇳",
-    members: "23K+",
-    color: "#FB7185",
-    imageUrl: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400&h=400&fit=crop",
-  },
-  {
-    id: "delhi",
-    name: "Delhi",
-    country: "India",
-    emoji: "🇮🇳",
-    members: "19K+",
-    color: "#FB923C",
-    imageUrl: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&h=400&fit=crop",
-  },
-  {
-    id: "san-francisco",
-    name: "San Francisco",
-    country: "United States",
-    emoji: "🇺🇸",
-    members: "12K+",
-    color: "#14B8A6",
-    imageUrl: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=400&fit=crop",
-  },
-  {
-    id: "london",
-    name: "London",
-    country: "United Kingdom",
-    emoji: "🇬🇧",
-    members: "22K+",
-    color: "#38BDF8",
-    imageUrl: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=400&fit=crop",
-  },
-  {
-    id: "new-york",
-    name: "New York",
-    country: "United States",
-    emoji: "🇺🇸",
-    members: "29K+",
-    color: "#A78BFA",
-    imageUrl: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=400&fit=crop",
-  },
-];
+import { cities } from "@/data/cities";
 
 export default function CitySelectionPage() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -76,6 +20,7 @@ export default function CitySelectionPage() {
 
   const handleContinue = () => {
     if (selected) {
+      localStorage.setItem("tribe-selected-city", selected);
       router.push("/onboarding/signup");
     }
   };
@@ -113,7 +58,7 @@ export default function CitySelectionPage() {
               onClick={() => setSelected(city.id)}
               className="relative overflow-hidden rounded-2xl border-2 transition-all"
               style={{
-                borderColor: isSelected ? city.color : "transparent",
+                borderColor: isSelected ? city.accentColor : "transparent",
               }}
             >
               <div className="relative aspect-square">
@@ -130,7 +75,7 @@ export default function CitySelectionPage() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-white"
-                    style={{ backgroundColor: city.color }}
+                    style={{ backgroundColor: city.accentColor }}
                   >
                     <Check className="h-4 w-4" />
                   </motion.div>
@@ -141,7 +86,7 @@ export default function CitySelectionPage() {
                   <span className="text-xs">{city.emoji}</span>
                   <span className="text-sm font-semibold">{city.name}</span>
                 </div>
-                <p className="text-xs text-white/70">{city.members} members</p>
+                <p className="text-xs text-white/70">{city.memberCountDisplay} members</p>
               </div>
             </motion.button>
           );

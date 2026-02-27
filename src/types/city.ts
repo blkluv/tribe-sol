@@ -13,4 +13,6 @@ export interface City {
   activeTribes: number;
   coordinates: Coordinates;
   accentColor: string;
+  emoji?: string;
+  memberCountDisplay?: string;
 }

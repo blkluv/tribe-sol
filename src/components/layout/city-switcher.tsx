@@ -35,6 +35,7 @@ export function CitySwitcher({ isOpen, onOpenChange }: CitySwitcherProps) {
         }
 
         try {
+            localStorage.setItem("tribe-selected-city", city.id);
             const data = await loadCityData(city);
             switchCity(city, data);
             onOpenChange(false);
