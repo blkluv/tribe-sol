@@ -12,14 +12,17 @@ import {
   Check,
   ExternalLink,
   Loader2,
+  Coins,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTip } from "@/hooks/use-tip";
 
 export default function WalletPage() {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const { setVisible } = useWalletModal();
   const { isConnected, walletAddress, isAuthenticated, profile, logout } = useAuth();
+  const { getTipHistory } = useTip();
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -171,6 +174,38 @@ export default function WalletPage() {
           <p className="mt-1 text-lg font-bold">Connected</p>
         </div>
       </div>
+
+      {/* Tip History */}
+      {getTipHistory().length > 0 && (
+        <div className="px-4 pb-4">
+          <h2 className="mb-3 text-base font-semibold">Recent Tips</h2>
+          <div className="space-y-2">
+            {getTipHistory().slice(0, 5).map((tip) => (
+              <div key={tip.id} className="flex items-center gap-3 rounded-xl border p-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/10">
+                  <Coins className="h-4 w-4 text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">
+                    Tipped {tip.amount} SOL to @{tip.recipientName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(tip.timestamp).toLocaleTimeString()}
+                  </p>
+                </div>
+                <a
+                  href={`https://explorer.solana.com/tx/${tip.signature}?cluster=devnet`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tapestry Profile */}
       {isAuthenticated && profile && (
