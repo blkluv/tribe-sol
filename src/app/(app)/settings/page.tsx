@@ -40,14 +40,14 @@ export default function SettingsPage() {
   const router = useRouter();
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="sticky top-0 z-40 border-b bg-white/95 px-4 py-4 backdrop-blur-md">
+    <div className="bg-background min-h-screen">
+      <div className="sticky top-0 z-40 border-b bg-background/95 px-4 py-4 backdrop-blur-md">
         <h1 className="text-xl font-black lowercase tracking-tighter">Settings</h1>
       </div>
 
       <div className="p-4 space-y-6">
         {settingGroups.map((group) => (
-          <div key={group.title} className="rounded-2xl border bg-white overflow-hidden shadow-sm">
+          <div key={group.title} className="rounded-2xl border bg-background overflow-hidden shadow-sm">
             <h2 className="px-4 pt-4 pb-2 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
               {group.title}
             </h2>

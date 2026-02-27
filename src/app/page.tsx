@@ -81,7 +81,7 @@ export default function LandingPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-full border bg-white/50 px-4 py-1.5 text-xs font-semibold backdrop-blur-sm"
+          className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-full border bg-background/50 px-4 py-1.5 text-xs font-semibold backdrop-blur-sm"
         >
           <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
           Hyperlocal Social Networking
@@ -112,7 +112,7 @@ export default function LandingPage() {
           className="relative mx-auto mb-32 max-w-2xl"
         >
           <div className="absolute -inset-1 rounded-[44px] bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-20 blur-xl" />
-          <div className="super-shadow relative rounded-[40px] border bg-white p-8">
+          <div className="super-shadow relative rounded-[40px] border bg-background p-8">
             <div className="flex flex-col items-center justify-center space-y-8 py-12">
               <div className="group relative flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-[32px] border-2 border-dashed border-muted-foreground/20 bg-muted/50 transition-all hover:border-primary/40 hover:bg-muted">
                 <div className="flex flex-col items-center gap-4 text-center">
@@ -162,7 +162,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="super-shadow group rounded-[32px] border bg-white/50 p-8 transition-all hover:bg-white"
+              className="super-shadow group rounded-[32px] border bg-background/50 p-8 transition-all hover:bg-background"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted transition-transform group-hover:scale-110">
                 <feature.icon className="h-7 w-7" />
@@ -184,7 +184,7 @@ export default function LandingPage() {
             {cities.map((city) => (
               <div
                 key={city.name}
-                className="flex items-center gap-4 rounded-[24px] border border-muted-foreground/10 bg-white/30 p-4 backdrop-blur-sm"
+                className="flex items-center gap-4 rounded-[24px] border border-muted-foreground/10 bg-background/30 p-4 backdrop-blur-sm"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-xl">
                   {city.emoji}
@@ -211,7 +211,7 @@ export default function LandingPage() {
             Get Started Free <ArrowRight className="h-6 w-6" />
           </Link>
           <div className="mt-12 text-sm font-bold text-muted-foreground uppercase tracking-widest">
-            &copy; 2024 Tribe. building hyperlocal communities.
+            &copy; 2025 Tribe. building hyperlocal communities.
           </div>
         </section>
       </main>

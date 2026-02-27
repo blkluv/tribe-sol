@@ -19,9 +19,9 @@ export default function ExplorePage() {
   );
 
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       {/* Search Bar Header */}
-      <div className="sticky top-0 z-40 space-y-4 border-b bg-white/95 px-4 py-4 backdrop-blur-md">
+      <div className="sticky top-0 z-40 space-y-4 border-b bg-background/95 px-4 py-4 backdrop-blur-md">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -29,7 +29,7 @@ export default function ExplorePage() {
             placeholder={`Search in ${currentCity?.name || "your city"}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border bg-muted/30 py-3 pl-12 pr-4 text-[15px] font-medium outline-none transition-all focus:bg-white focus:ring-2 focus:ring-primary/5"
+            className="w-full rounded-2xl border bg-muted/30 py-3 pl-12 pr-4 text-[15px] font-medium outline-none transition-all focus:bg-background focus:ring-2 focus:ring-primary/5"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar">

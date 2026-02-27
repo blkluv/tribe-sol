@@ -12,6 +12,11 @@ import {
   Network,
   User,
   ArrowLeft,
+  MessageCircle,
+  BadgeCheck,
+  Linkedin,
+  Twitter,
+  Globe,
 } from "lucide-react";
 
 const tabs = [
@@ -35,6 +40,21 @@ const mockSpeakers = [
   { id: "s2", name: "Anna Rose", title: "Host", company: "Zero Knowledge Podcast", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" },
   { id: "s3", name: "Hayden Adams", title: "Founder", company: "Uniswap", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop" },
   { id: "s4", name: "Karl Floersch", title: "CEO", company: "Optimism", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop" },
+];
+
+const mockAttendees = [
+  { id: "a1", name: "Sarah Chen", role: "DeFi Developer", company: "Aave", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop", isOnline: true, mutual: 3 },
+  { id: "a2", name: "James Park", role: "Protocol Engineer", company: "Chainlink", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop", isOnline: true, mutual: 7 },
+  { id: "a3", name: "Elena Rossi", role: "Smart Contract Auditor", company: "OpenZeppelin", avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop", isOnline: false, mutual: 2 },
+  { id: "a4", name: "Dev Patel", role: "Full Stack Developer", company: "Polygon", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop", isOnline: true, mutual: 5 },
+  { id: "a5", name: "Mika Tanaka", role: "Product Manager", company: "Solana Labs", avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop", isOnline: false, mutual: 1 },
+  { id: "a6", name: "Alice Wang", role: "ZK Researcher", company: "Starknet", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop", isOnline: true, mutual: 4 },
+];
+
+const venues = [
+  { name: "Istanbul Congress Center", desc: "Main venue for keynotes and workshops", location: "Harbiye, Sisli, Istanbul", capacity: "3,000" },
+  { name: "The Halikarnas Hall", desc: "Breakout sessions and panel discussions", location: "Beyoglu, Istanbul", capacity: "500" },
+  { name: "Bosphorus Terrace", desc: "Networking events and evening socials", location: "Besiktas, Istanbul", capacity: "200" },
 ];
 
 export default function ConferencePage() {
@@ -133,30 +153,120 @@ export default function ConferencePage() {
 
         {activeTab === "venues" && (
           <div className="space-y-3">
-            <div className="rounded-xl border p-4">
-              <h3 className="font-semibold">Istanbul Congress Center</h3>
-              <p className="text-sm text-muted-foreground">Main venue for keynotes and workshops</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                <MapPin className="mr-1 inline h-3 w-3" />
-                Harbiye, Sisli, Istanbul
-              </p>
-            </div>
+            {venues.map((venue) => (
+              <div key={venue.name} className="rounded-xl border p-4">
+                <h3 className="font-semibold">{venue.name}</h3>
+                <p className="text-sm text-muted-foreground">{venue.desc}</p>
+                <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {venue.location}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {venue.capacity} capacity
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         {activeTab === "networking" && (
-          <div className="flex h-48 flex-col items-center justify-center text-center">
-            <Network className="mb-3 h-10 w-10 text-muted-foreground" />
-            <p className="font-semibold">Networking</p>
-            <p className="text-sm text-muted-foreground">Connect with fellow attendees</p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">Attendees Near You</h2>
+              <span className="text-xs text-muted-foreground">{mockAttendees.filter((a) => a.isOnline).length} online</span>
+            </div>
+            <div className="space-y-3">
+              {mockAttendees.map((attendee) => (
+                <div key={attendee.id} className="flex items-center gap-3 rounded-xl border p-3">
+                  <div className="relative">
+                    <div className="relative h-11 w-11 overflow-hidden rounded-full">
+                      <Image src={attendee.avatar} alt="" fill className="object-cover" sizes="44px" />
+                    </div>
+                    {attendee.isOnline && (
+                      <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-background bg-emerald-500" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold truncate">{attendee.name}</p>
+                      <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{attendee.role} at {attendee.company}</p>
+                    <p className="text-[10px] text-muted-foreground">{attendee.mutual} mutual connections</p>
+                  </div>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-600 hover:bg-violet-200 transition-colors dark:bg-violet-500/10 dark:hover:bg-violet-500/20">
+                    <MessageCircle className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {activeTab === "profile" && (
-          <div className="flex h-48 flex-col items-center justify-center text-center">
-            <User className="mb-3 h-10 w-10 text-muted-foreground" />
-            <p className="font-semibold">Conference Profile</p>
-            <p className="text-sm text-muted-foreground">Set up your conference profile</p>
+          <div className="space-y-6">
+            {/* Profile Card */}
+            <div className="rounded-2xl border p-6 text-center">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-2xl font-bold text-white">
+                YU
+              </div>
+              <h2 className="text-lg font-bold">Your Username</h2>
+              <p className="text-sm text-muted-foreground">Blockchain Developer</p>
+              <p className="mt-1 text-xs text-muted-foreground">Building the future of decentralized communities</p>
+
+              <div className="mt-4 flex justify-center gap-6">
+                <div className="text-center">
+                  <p className="text-sm font-black">12</p>
+                  <p className="text-[10px] text-muted-foreground">Connections</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-black">5</p>
+                  <p className="text-[10px] text-muted-foreground">Sessions</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-black">3</p>
+                  <p className="text-[10px] text-muted-foreground">Bookmarked</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Interests */}
+            <div>
+              <h3 className="mb-3 text-sm font-semibold">Your Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {["DeFi", "ZK Proofs", "Layer 2", "DAOs", "NFTs", "Solana", "Ethereum"].map((tag) => (
+                  <span key={tag} className="rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700 dark:bg-violet-500/10 dark:text-violet-400">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div>
+              <h3 className="mb-3 text-sm font-semibold">Social Links</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 rounded-xl border p-3 text-sm">
+                  <Twitter className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">@yourhandle</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border p-3 text-sm">
+                  <Linkedin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">linkedin.com/in/yourprofile</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border p-3 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">yourwebsite.com</span>
+                </div>
+              </div>
+            </div>
+
+            <button className="w-full rounded-xl bg-violet-500 py-3 text-sm font-semibold text-white hover:bg-violet-600 transition-colors">
+              Edit Profile
+            </button>
           </div>
         )}
       </div>

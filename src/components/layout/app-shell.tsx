@@ -1,16 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { BottomNav } from "./bottom-nav";
 import { SidebarNav } from "./sidebar-nav";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, ExternalLink } from "lucide-react";
+import { useTribeStore } from "@/store/use-tribe-store";
+import { Wallet, ExternalLink, Users } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 function RightSidebar() {
   const { isAuthenticated, profile, walletAddress } = useAuth();
+  const { tribes, currentUser, joinTribe } = useTribeStore();
 
   const displayAddress = walletAddress
     ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     : null;
+
+  const suggestedTribes = tribes.filter((t) => !t.isJoined).slice(0, 3);
 
   return (
     <aside className="hidden lg:block w-[350px] p-8 space-y-8 sticky top-0 h-screen overflow-y-auto">
@@ -69,6 +75,32 @@ function RightSidebar() {
             </div>
           )}
         </div>
+      ) : currentUser ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-lg">
+              {currentUser.displayName.charAt(0).toUpperCase()}
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <p className="text-sm font-bold truncate">{currentUser.displayName}</p>
+              <p className="text-xs text-muted-foreground">@{currentUser.username}</p>
+            </div>
+          </div>
+          <div className="flex gap-4 text-center">
+            <div>
+              <p className="text-sm font-black">1.2K</p>
+              <p className="text-[10px] text-muted-foreground">Followers</p>
+            </div>
+            <div>
+              <p className="text-sm font-black">340</p>
+              <p className="text-[10px] text-muted-foreground">Following</p>
+            </div>
+            <div>
+              <p className="text-sm font-black">42</p>
+              <p className="text-[10px] text-muted-foreground">Posts</p>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-full bg-muted animate-pulse" />
@@ -82,16 +114,26 @@ function RightSidebar() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold text-muted-foreground">Suggested Tribes</span>
-          <button className="text-xs font-bold hover:opacity-70">See All</button>
+          <Link href="/tribes" className="text-xs font-bold hover:opacity-70">See All</Link>
         </div>
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-            <div className="flex-1 space-y-1">
-              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-              <div className="h-2 w-24 rounded bg-muted animate-pulse" />
+        {suggestedTribes.map((tribe) => (
+          <div key={tribe.id} className="flex items-center gap-3">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: `${tribe.color}20`, color: tribe.color }}
+            >
+              <Users className="h-4 w-4" />
             </div>
-            <button className="text-xs font-bold text-blue-500">Follow</button>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold truncate">{tribe.name}</p>
+              <p className="text-[10px] text-muted-foreground">{formatNumber(tribe.members)} members</p>
+            </div>
+            <button
+              onClick={() => joinTribe(tribe.id)}
+              className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors"
+            >
+              Join
+            </button>
           </div>
         ))}
       </div>
@@ -105,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarNav />
       <div className="flex flex-1 justify-center">
         <main className="w-full max-w-[1000px] flex">
-          <div className="flex-1 w-full max-w-[630px] border-x min-h-screen pb-20 md:pb-0 bg-white shadow-sm">
+          <div className="flex-1 w-full max-w-[630px] border-x min-h-screen pb-20 md:pb-0 bg-background shadow-sm">
             {children}
           </div>
           <RightSidebar />

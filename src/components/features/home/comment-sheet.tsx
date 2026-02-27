@@ -63,7 +63,7 @@ export function CommentSheet({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-hidden rounded-t-2xl bg-background shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b px-4 py-3">
