@@ -15,6 +15,32 @@ import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/tribe/wallet-button";
 import { AppHeader } from "@/components/layout/app-header";
 
+const iconMap: Record<string, string> = {
+  bike: "🚲",
+  cycling: "🚲",
+  utensils: "🍴",
+  food: "🍜",
+  tech: "💻",
+  fitness: "💪",
+  music: "🎸",
+  camera: "📸",
+  mountain: "🏔️",
+  landmark: "🏛️",
+  palette: "🎨",
+  leaf: "🌿",
+  rocket: "🚀",
+  wine: "🍷",
+  pizza: "🍕",
+  code: "👨‍💻",
+  drama: "🎭",
+  users: "👥",
+  sun: "☀️",
+  dumbbell: "🏋️",
+  heart: "❤️",
+  star: "⭐",
+  "map-pin": "📍",
+};
+
 // Lazy-load cities data
 let citiesCache: City[] | null = null;
 async function getCities(): Promise<City[]> {
@@ -83,20 +109,27 @@ export function HomeFeed() {
     <div className="pb-24 bg-[#fcfcfc] min-h-screen">
       <AppHeader />
 
-      {/* Tribe Pulse Bar (Alternative to Stories) */}
       <div className="px-6 py-6 overflow-hidden">
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
           {tribes.map((tribe) => (
             <button
               key={tribe.id}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-[#f0f0f0] shadow-sm hover:shadow-md transition-all active:scale-95 group shrink-0"
+              className="flex items-center gap-3 pl-2 pr-6 py-2 rounded-full bg-white border border-[#f0f0f0] shadow-sm hover:shadow-xl hover:shadow-black/[0.05] transition-all active:scale-95 group shrink-0"
             >
-              <span className="text-lg group-hover:scale-125 transition-transform">{tribe.icon}</span>
-              <span className="text-[13px] font-bold tracking-tight">{tribe.name}</span>
+              <div
+                className="h-11 w-11 flex items-center justify-center rounded-full text-xl shadow-inner group-hover:rotate-12 transition-transform"
+                style={{ backgroundColor: `${tribe.color}15` }}
+              >
+                {iconMap[tribe.icon] || tribe.icon}
+              </div>
+              <span className="text-[14px] font-black tracking-tight text-black">{tribe.name}</span>
             </button>
           ))}
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary/5 text-primary border border-primary/10 shadow-sm shrink-0 font-bold text-[13px]">
-            <Plus className="h-4 w-4" /> Discover
+          <button className="flex items-center gap-3 pl-2 pr-6 py-2 rounded-full bg-primary/5 text-primary border border-primary/10 shadow-sm shrink-0 font-black text-[14px] hover:bg-primary/10 transition-colors">
+            <div className="h-11 w-11 flex items-center justify-center rounded-full bg-white shadow-sm ring-4 ring-primary/5">
+              <Plus className="h-5 w-5 stroke-[3px]" />
+            </div>
+            Discover
           </button>
         </div>
       </div>

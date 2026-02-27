@@ -102,7 +102,15 @@ export default function CreatePage() {
           </button>
           <div className="flex flex-col">
             <h1 className="text-xl font-bold tracking-tight leading-none">{title}</h1>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mt-1.5">{currentCity?.name} Pulse</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{currentCity?.name}</span>
+              <button
+                onClick={() => {/* Trigger city switcher */ }}
+                className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
+              >
+                (Change City)
+              </button>
+            </div>
           </div>
         </div>
         <button

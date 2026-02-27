@@ -35,19 +35,17 @@ export function AppHeader({ title, showBackButton }: AppHeaderProps) {
                     <h1 className="text-xl font-bold tracking-tight leading-none">
                         {title || currentCity?.name || "Tribe"}
                     </h1>
-                    {!title && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                            {currentCity?.name || "Local"}
+                        </span>
                         <button
                             onClick={() => {/* Trigger city switcher modal */ }}
-                            className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity text-left mt-1.5"
+                            className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity"
                         >
-                            Switch City
+                            (Change City)
                         </button>
-                    )}
-                    {title && (
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mt-1.5">
-                            {currentCity?.name || "Local"} Pulse
-                        </p>
-                    )}
+                    </div>
                 </div>
             </div>
 
