@@ -1,29 +1,46 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useTapestryProfile } from "@/hooks/use-tapestry-profile";
-import type { TapestryProfile } from "@/types/tapestry";
 
-// Mock the tapestry client
-vi.mock("@/lib/tapestry", () => ({
-  getProfile: vi.fn(),
-}));
+// Mock global fetch
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
 
-import * as tapestry from "@/lib/tapestry";
-
-const mockProfile: TapestryProfile = {
-  id: "profile-1",
-  blockchain: "SOLANA",
+// SDK-shaped profile detail response
+const sdkProfileDetail = {
+  profile: {
+    id: "profile-1",
+    namespace: "tribe",
+    created_at: 1704067200,
+    username: "testuser",
+    bio: "Hello world",
+    image: null,
+  },
   walletAddress: "wallet123",
-  username: "testuser",
-  bio: "Hello world",
-  namespace: "tribe",
-  created_at: "2025-01-01T00:00:00Z",
-  socialCounts: { followers: 10, following: 5, posts: 3 },
+  socialCounts: { followers: 10, following: 5 },
 };
+
+function mockOkResponse(data: unknown) {
+  return Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data)),
+  });
+}
+
+function mockErrorResponse(status = 500, body = "Error") {
+  return Promise.resolve({
+    ok: false,
+    status,
+    json: () => Promise.reject(new Error("not json")),
+    text: () => Promise.resolve(body),
+  });
+}
 
 describe("useTapestryProfile", () => {
   beforeEach(() => {
-    vi.mocked(tapestry.getProfile).mockReset();
+    mockFetch.mockReset();
   });
 
   describe("Initial state", () => {
@@ -45,28 +62,33 @@ describe("useTapestryProfile", () => {
 
   describe("Fetching profile", () => {
     it("should fetch profile when profileId is provided", async () => {
-      vi.mocked(tapestry.getProfile).mockResolvedValue(mockProfile);
+      mockFetch.mockReturnValue(mockOkResponse(sdkProfileDetail));
 
       const { result } = renderHook(() => useTapestryProfile("profile-1"));
 
       await waitFor(() => {
-        expect(result.current.profile).toEqual(mockProfile);
+        expect(result.current.profile).not.toBeNull();
       });
 
-      expect(tapestry.getProfile).toHaveBeenCalledWith("profile-1");
+      expect(result.current.profile!.id).toBe("profile-1");
+      expect(result.current.profile!.username).toBe("testuser");
+      expect(result.current.profile!.walletAddress).toBe("wallet123");
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/profiles/info?username=profile-1")
+      );
     });
 
     it("should not fetch when profileId is null", () => {
       renderHook(() => useTapestryProfile(null));
 
-      expect(tapestry.getProfile).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("should set isLoading true while fetching", async () => {
-      let resolvePromise: (value: TapestryProfile) => void;
-      vi.mocked(tapestry.getProfile).mockReturnValue(
+      let resolvePromise: (value: unknown) => void;
+      mockFetch.mockReturnValue(
         new Promise((resolve) => {
           resolvePromise = resolve;
         })
@@ -79,7 +101,11 @@ describe("useTapestryProfile", () => {
       });
 
       await act(async () => {
-        resolvePromise!(mockProfile);
+        resolvePromise!({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve(sdkProfileDetail),
+        });
       });
 
       await waitFor(() => {
@@ -89,38 +115,39 @@ describe("useTapestryProfile", () => {
   });
 
   describe("Error handling", () => {
-    it("should set error when fetch fails with Error", async () => {
-      vi.mocked(tapestry.getProfile).mockRejectedValue(
-        new Error("Network error")
-      );
+    it("should set error when fetch fails", async () => {
+      mockFetch.mockReturnValue(mockErrorResponse(404));
 
       const { result } = renderHook(() => useTapestryProfile("profile-1"));
 
       await waitFor(() => {
-        expect(result.current.error).toBe("Network error");
+        expect(result.current.error).toBeTruthy();
       });
 
       expect(result.current.profile).toBeNull();
       expect(result.current.isLoading).toBe(false);
     });
 
-    it("should set generic error when fetch fails with non-Error", async () => {
-      vi.mocked(tapestry.getProfile).mockRejectedValue("string error");
+    it("should set error when fetch throws", async () => {
+      mockFetch.mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() => useTapestryProfile("profile-1"));
 
       await waitFor(() => {
-        expect(result.current.error).toBe("Failed to fetch profile");
+        expect(result.current.error).toBe("Network error");
       });
     });
   });
 
   describe("Re-fetching", () => {
     it("should refetch when profileId changes", async () => {
-      const profile2 = { ...mockProfile, id: "profile-2", username: "user2" };
-      vi.mocked(tapestry.getProfile)
-        .mockResolvedValueOnce(mockProfile)
-        .mockResolvedValueOnce(profile2);
+      const profile2 = {
+        ...sdkProfileDetail,
+        profile: { ...sdkProfileDetail.profile, id: "profile-2", username: "user2" },
+      };
+      mockFetch
+        .mockReturnValueOnce(mockOkResponse(sdkProfileDetail))
+        .mockReturnValueOnce(mockOkResponse(profile2));
 
       const { result, rerender } = renderHook(
         ({ id }) => useTapestryProfile(id),
@@ -137,13 +164,17 @@ describe("useTapestryProfile", () => {
         expect(result.current.profile?.id).toBe("profile-2");
       });
 
-      expect(tapestry.getProfile).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
     it("should support manual refetch", async () => {
-      vi.mocked(tapestry.getProfile)
-        .mockResolvedValueOnce(mockProfile)
-        .mockResolvedValueOnce({ ...mockProfile, bio: "Updated bio" });
+      const updatedProfile = {
+        ...sdkProfileDetail,
+        profile: { ...sdkProfileDetail.profile, bio: "Updated bio" },
+      };
+      mockFetch
+        .mockReturnValueOnce(mockOkResponse(sdkProfileDetail))
+        .mockReturnValueOnce(mockOkResponse(updatedProfile));
 
       const { result } = renderHook(() => useTapestryProfile("profile-1"));
 

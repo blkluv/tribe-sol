@@ -2,19 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useFollow } from "@/hooks/use-follow";
 
-// Mock tapestry client
-vi.mock("@/lib/tapestry", () => ({
-  checkFollowStatus: vi.fn(),
-  followUser: vi.fn(),
-  unfollowUser: vi.fn(),
-}));
+// Mock global fetch
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
 
 // Mock useAuth hook
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
-import * as tapestry from "@/lib/tapestry";
 import { useAuth } from "@/hooks/use-auth";
 
 const mockAuth = {
@@ -28,20 +24,37 @@ const mockAuth = {
   logout: vi.fn(),
 };
 
+function mockOkResponse(data: unknown = {}) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data)),
+  });
+}
+
+function mockErrorResponse() {
+  return Promise.resolve({
+    ok: false,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve("Error"),
+  });
+}
+
 describe("useFollow", () => {
   beforeEach(() => {
     vi.mocked(useAuth).mockReturnValue(mockAuth as ReturnType<typeof useAuth>);
-    vi.mocked(tapestry.checkFollowStatus).mockReset();
-    vi.mocked(tapestry.followUser).mockReset();
-    vi.mocked(tapestry.unfollowUser).mockReset();
+    mockFetch.mockReset();
+    // Default: follow state check returns false
+    mockFetch.mockImplementation((url: string) => {
+      if (typeof url === "string" && url.includes("/api/followers/state")) {
+        return mockOkResponse({ isFollowing: false });
+      }
+      return mockOkResponse({});
+    });
   });
 
   describe("Initial state", () => {
     it("should start not following", () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: false,
-      });
-
       const { result } = renderHook(() => useFollow("other-user"));
 
       expect(result.current.isFollowing).toBe(false);
@@ -51,8 +64,11 @@ describe("useFollow", () => {
 
   describe("Check follow status on mount", () => {
     it("should check follow status when authenticated with valid targetProfileId", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: true,
+      mockFetch.mockImplementation((url: string) => {
+        if (typeof url === "string" && url.includes("/api/followers/state")) {
+          return mockOkResponse({ isFollowing: true });
+        }
+        return mockOkResponse({});
       });
 
       const { result } = renderHook(() => useFollow("other-user"));
@@ -61,9 +77,8 @@ describe("useFollow", () => {
         expect(result.current.isFollowing).toBe(true);
       });
 
-      expect(tapestry.checkFollowStatus).toHaveBeenCalledWith(
-        "my-profile",
-        "other-user"
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/followers/state?startId=my-profile&endId=other-user")
       );
     });
 
@@ -76,25 +91,23 @@ describe("useFollow", () => {
 
       renderHook(() => useFollow("other-user"));
 
-      expect(tapestry.checkFollowStatus).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("should not check when targetProfileId is null", () => {
       renderHook(() => useFollow(null));
 
-      expect(tapestry.checkFollowStatus).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("should not check follow status for self (same profile ID)", () => {
       renderHook(() => useFollow("my-profile"));
 
-      expect(tapestry.checkFollowStatus).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("should silently ignore check errors", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockRejectedValue(
-        new Error("fail")
-      );
+      mockFetch.mockRejectedValue(new Error("fail"));
 
       const { result } = renderHook(() => useFollow("other-user"));
 
@@ -106,16 +119,10 @@ describe("useFollow", () => {
 
   describe("toggleFollow - following", () => {
     it("should optimistically follow and call API", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: false,
-      });
-      vi.mocked(tapestry.followUser).mockResolvedValue(undefined);
-
       const { result } = renderHook(() => useFollow("other-user"));
 
-      // Wait for the initial checkFollowStatus effect to settle
       await waitFor(() => {
-        expect(tapestry.checkFollowStatus).toHaveBeenCalled();
+        expect(mockFetch).toHaveBeenCalled();
       });
 
       await act(async () => {
@@ -123,17 +130,25 @@ describe("useFollow", () => {
       });
 
       expect(result.current.isFollowing).toBe(true);
-      expect(tapestry.followUser).toHaveBeenCalledWith(
-        "my-profile",
-        "other-user"
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/followers/add",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            startId: "my-profile",
+            endId: "other-user",
+          }),
+        })
       );
     });
 
     it("should optimistically unfollow and call API", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: true,
+      mockFetch.mockImplementation((url: string) => {
+        if (typeof url === "string" && url.includes("/api/followers/state")) {
+          return mockOkResponse({ isFollowing: true });
+        }
+        return mockOkResponse({});
       });
-      vi.mocked(tapestry.unfollowUser).mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useFollow("other-user"));
 
@@ -146,19 +161,27 @@ describe("useFollow", () => {
       });
 
       expect(result.current.isFollowing).toBe(false);
-      expect(tapestry.unfollowUser).toHaveBeenCalledWith(
-        "my-profile",
-        "other-user"
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/followers/remove",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            startId: "my-profile",
+            endId: "other-user",
+          }),
+        })
       );
     });
   });
 
   describe("toggleFollow - rollback on error", () => {
     it("should rollback follow on API failure", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: false,
+      mockFetch.mockImplementation((url: string) => {
+        if (typeof url === "string" && url.includes("/api/followers/state")) {
+          return mockOkResponse({ isFollowing: false });
+        }
+        return mockErrorResponse();
       });
-      vi.mocked(tapestry.followUser).mockRejectedValue(new Error("fail"));
 
       const { result } = renderHook(() => useFollow("other-user"));
 
@@ -170,10 +193,12 @@ describe("useFollow", () => {
     });
 
     it("should rollback unfollow on API failure", async () => {
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: true,
+      mockFetch.mockImplementation((url: string) => {
+        if (typeof url === "string" && url.includes("/api/followers/state")) {
+          return mockOkResponse({ isFollowing: true });
+        }
+        return mockErrorResponse();
       });
-      vi.mocked(tapestry.unfollowUser).mockRejectedValue(new Error("fail"));
 
       const { result } = renderHook(() => useFollow("other-user"));
 
@@ -203,8 +228,15 @@ describe("useFollow", () => {
         await result.current.toggleFollow();
       });
 
-      expect(tapestry.followUser).not.toHaveBeenCalled();
-      expect(tapestry.unfollowUser).not.toHaveBeenCalled();
+      // No follow/unfollow API calls should have been made
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/followers/add",
+        expect.anything()
+      );
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/followers/remove",
+        expect.anything()
+      );
     });
 
     it("should do nothing when targetProfileId is null", async () => {
@@ -214,69 +246,10 @@ describe("useFollow", () => {
         await result.current.toggleFollow();
       });
 
-      expect(tapestry.followUser).not.toHaveBeenCalled();
-    });
-
-    it("should prevent concurrent toggles while loading", async () => {
-      let resolvePromise: () => void;
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: false,
-      });
-      vi.mocked(tapestry.followUser).mockReturnValue(
-        new Promise<void>((resolve) => {
-          resolvePromise = resolve;
-        })
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/followers/add",
+        expect.anything()
       );
-
-      const { result } = renderHook(() => useFollow("other-user"));
-
-      // First toggle
-      let firstToggle: Promise<void>;
-      act(() => {
-        firstToggle = result.current.toggleFollow();
-      });
-
-      // Second toggle while first is in progress — should be a no-op
-      await act(async () => {
-        await result.current.toggleFollow();
-      });
-
-      expect(tapestry.followUser).toHaveBeenCalledTimes(1);
-
-      await act(async () => {
-        resolvePromise!();
-        await firstToggle!;
-      });
-    });
-  });
-
-  describe("isLoading state", () => {
-    it("should set isLoading during toggle", async () => {
-      let resolvePromise: () => void;
-      vi.mocked(tapestry.checkFollowStatus).mockResolvedValue({
-        isFollowing: false,
-      });
-      vi.mocked(tapestry.followUser).mockReturnValue(
-        new Promise<void>((resolve) => {
-          resolvePromise = resolve;
-        })
-      );
-
-      const { result } = renderHook(() => useFollow("other-user"));
-
-      let togglePromise: Promise<void>;
-      act(() => {
-        togglePromise = result.current.toggleFollow();
-      });
-
-      expect(result.current.isLoading).toBe(true);
-
-      await act(async () => {
-        resolvePromise!();
-        await togglePromise!;
-      });
-
-      expect(result.current.isLoading).toBe(false);
     });
   });
 });

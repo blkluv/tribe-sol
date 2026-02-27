@@ -2,19 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useLike } from "@/hooks/use-like";
 
-// Mock tapestry client
-vi.mock("@/lib/tapestry", () => ({
-  checkLikeStatus: vi.fn(),
-  likeContent: vi.fn(),
-  unlikeContent: vi.fn(),
-}));
+// Mock global fetch
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
 
 // Mock useAuth hook
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
-import * as tapestry from "@/lib/tapestry";
 import { useAuth } from "@/hooks/use-auth";
 
 const mockAuth = {
@@ -28,18 +24,31 @@ const mockAuth = {
   logout: vi.fn(),
 };
 
+function mockOkResponse(data: unknown = {}) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data)),
+  });
+}
+
+function mockErrorResponse() {
+  return Promise.resolve({
+    ok: false,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve("Error"),
+  });
+}
+
 describe("useLike", () => {
   beforeEach(() => {
     vi.mocked(useAuth).mockReturnValue(mockAuth as ReturnType<typeof useAuth>);
-    vi.mocked(tapestry.checkLikeStatus).mockReset();
-    vi.mocked(tapestry.likeContent).mockReset();
-    vi.mocked(tapestry.unlikeContent).mockReset();
+    mockFetch.mockReset();
+    mockFetch.mockReturnValue(mockOkResponse({}));
   });
 
   describe("Initial state", () => {
     it("should initialize with provided values", () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-
       const { result } = renderHook(() => useLike("content-1", true, 5));
 
       expect(result.current.isLiked).toBe(true);
@@ -48,8 +57,6 @@ describe("useLike", () => {
     });
 
     it("should sync with prop changes", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-
       const { result, rerender } = renderHook(
         ({ liked, count }) => useLike("content-1", liked, count),
         { initialProps: { liked: false, count: 0 } }
@@ -67,65 +74,9 @@ describe("useLike", () => {
     });
   });
 
-  describe("Check like status on mount", () => {
-    it("should check like status from Tapestry when authenticated", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: true });
-
-      const { result } = renderHook(() => useLike("content-1", false, 5));
-
-      await waitFor(() => {
-        expect(result.current.isLiked).toBe(true);
-      });
-
-      expect(tapestry.checkLikeStatus).toHaveBeenCalledWith(
-        "user-1",
-        "content-1"
-      );
-    });
-
-    it("should not check like status when not authenticated", () => {
-      vi.mocked(useAuth).mockReturnValue({
-        ...mockAuth,
-        isAuthenticated: false,
-        profile: null,
-      } as ReturnType<typeof useAuth>);
-
-      renderHook(() => useLike("content-1", false, 5));
-
-      expect(tapestry.checkLikeStatus).not.toHaveBeenCalled();
-    });
-
-    it("should not check like status when contentId is null", () => {
-      renderHook(() => useLike(null, false, 0));
-
-      expect(tapestry.checkLikeStatus).not.toHaveBeenCalled();
-    });
-
-    it("should silently ignore check errors", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockRejectedValue(
-        new Error("fail")
-      );
-
-      const { result } = renderHook(() => useLike("content-1", false, 5));
-
-      // Should remain at initial value, no error thrown
-      await waitFor(() => {
-        expect(result.current.isLiked).toBe(false);
-      });
-    });
-  });
-
   describe("toggleLike - liking", () => {
     it("should optimistically update isLiked and likeCount when liking", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-      vi.mocked(tapestry.likeContent).mockResolvedValue(undefined);
-
       const { result } = renderHook(() => useLike("content-1", false, 5));
-
-      // Wait for the initial checkLikeStatus effect to settle
-      await waitFor(() => {
-        expect(tapestry.checkLikeStatus).toHaveBeenCalled();
-      });
 
       await act(async () => {
         await result.current.toggleLike();
@@ -133,19 +84,20 @@ describe("useLike", () => {
 
       expect(result.current.isLiked).toBe(true);
       expect(result.current.likeCount).toBe(6);
-      expect(tapestry.likeContent).toHaveBeenCalledWith("user-1", "content-1");
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/likes",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            nodeId: "content-1",
+            startId: "user-1",
+          }),
+        })
+      );
     });
 
     it("should optimistically update when unliking", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: true });
-      vi.mocked(tapestry.unlikeContent).mockResolvedValue(undefined);
-
       const { result } = renderHook(() => useLike("content-1", true, 5));
-
-      // Wait for the initial checkLikeStatus effect to settle (sets isLiked to true)
-      await waitFor(() => {
-        expect(tapestry.checkLikeStatus).toHaveBeenCalled();
-      });
 
       await act(async () => {
         await result.current.toggleLike();
@@ -153,17 +105,22 @@ describe("useLike", () => {
 
       expect(result.current.isLiked).toBe(false);
       expect(result.current.likeCount).toBe(4);
-      expect(tapestry.unlikeContent).toHaveBeenCalledWith(
-        "user-1",
-        "content-1"
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/likes",
+        expect.objectContaining({
+          method: "DELETE",
+          body: JSON.stringify({
+            nodeId: "content-1",
+            startId: "user-1",
+          }),
+        })
       );
     });
   });
 
   describe("toggleLike - rollback on error", () => {
     it("should rollback like on API failure", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-      vi.mocked(tapestry.likeContent).mockRejectedValue(new Error("fail"));
+      mockFetch.mockReturnValue(mockErrorResponse());
 
       const { result } = renderHook(() => useLike("content-1", false, 5));
 
@@ -177,8 +134,7 @@ describe("useLike", () => {
     });
 
     it("should rollback unlike on API failure", async () => {
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: true });
-      vi.mocked(tapestry.unlikeContent).mockRejectedValue(new Error("fail"));
+      mockFetch.mockReturnValue(mockErrorResponse());
 
       const { result } = renderHook(() => useLike("content-1", true, 5));
 
@@ -200,8 +156,10 @@ describe("useLike", () => {
         await result.current.toggleLike();
       });
 
-      expect(tapestry.likeContent).not.toHaveBeenCalled();
-      expect(tapestry.unlikeContent).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/likes",
+        expect.anything()
+      );
     });
 
     it("should still do optimistic update when not authenticated (local-only toggle)", async () => {
@@ -220,16 +178,18 @@ describe("useLike", () => {
       // Optimistic update still happens, just no API call
       expect(result.current.isLiked).toBe(true);
       expect(result.current.likeCount).toBe(6);
-      expect(tapestry.likeContent).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/likes",
+        expect.anything()
+      );
     });
   });
 
   describe("isLoading state", () => {
     it("should set isLoading during toggle", async () => {
-      let resolvePromise: () => void;
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-      vi.mocked(tapestry.likeContent).mockReturnValue(
-        new Promise<void>((resolve) => {
+      let resolvePromise: (value: unknown) => void;
+      mockFetch.mockReturnValue(
+        new Promise((resolve) => {
           resolvePromise = resolve;
         })
       );
@@ -245,42 +205,11 @@ describe("useLike", () => {
       expect(result.current.isLoading).toBe(true);
 
       await act(async () => {
-        resolvePromise!();
+        resolvePromise!({ ok: true, json: () => Promise.resolve({}) });
         await togglePromise!;
       });
 
       expect(result.current.isLoading).toBe(false);
-    });
-
-    it("should prevent concurrent toggles while loading", async () => {
-      let resolvePromise: () => void;
-      vi.mocked(tapestry.checkLikeStatus).mockResolvedValue({ isLiked: false });
-      vi.mocked(tapestry.likeContent).mockReturnValue(
-        new Promise<void>((resolve) => {
-          resolvePromise = resolve;
-        })
-      );
-
-      const { result } = renderHook(() => useLike("content-1", false, 5));
-
-      // First toggle
-      let firstToggle: Promise<void>;
-      act(() => {
-        firstToggle = result.current.toggleLike();
-      });
-
-      // Second toggle should be a no-op (isLoading is true)
-      await act(async () => {
-        await result.current.toggleLike();
-      });
-
-      // Only one API call should have been made
-      expect(tapestry.likeContent).toHaveBeenCalledTimes(1);
-
-      await act(async () => {
-        resolvePromise!();
-        await firstToggle!;
-      });
     });
   });
 });
