@@ -11,7 +11,6 @@ import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
 import { cn, formatNumber } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { useShare } from "@/hooks/use-share";
-import * as tapestry from "@/lib/tapestry";
 import { AppHeader } from "@/components/layout/app-header";
 
 const tabs = ["Activity", "Badges", "Stats"];

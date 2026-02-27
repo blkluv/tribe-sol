@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import type { City, Cast, Poll, Task, Crowdfund, Tribe, ExploreItem, User } from "@/types";
-import * as tapestry from "@/lib/tapestry";
 import { useAuthStore } from "./use-auth-store";
 import { useNotificationStore } from "./use-notification-store";
 
@@ -177,15 +176,25 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
       const city = get().currentCity;
-      tapestry
-        .createContent(profileId, [
-          { key: "type", value: "cast" },
-          { key: "caption", value: cast.caption },
-          { key: "imageUrl", value: cast.imageUrl },
-          ...(city ? [{ key: "cityId", value: city.id }] : []),
-        ])
+      fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `cast-${cast.id}`,
+          profileId,
+          properties: [
+            { key: "type", value: "cast" },
+            { key: "caption", value: cast.caption },
+            { key: "imageUrl", value: cast.imageUrl },
+            ...(city ? [{ key: "cityId", value: city.id }] : []),
+          ],
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed");
+          return res.json();
+        })
         .then((content) => {
-          // Store the Tapestry content ID back on the cast
           set((state) => ({
             casts: state.casts.map((c) =>
               c.id === cast.id ? { ...c, tapestryContentId: content.id } : c
@@ -217,12 +226,23 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
-      tapestry
-        .createContent(profileId, [
-          { key: "type", value: "poll" },
-          { key: "question", value: poll.question },
-          { key: "options", value: JSON.stringify(poll.options) },
-        ])
+      fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `poll-${poll.id}`,
+          profileId,
+          properties: [
+            { key: "type", value: "poll" },
+            { key: "question", value: poll.question },
+            { key: "options", value: JSON.stringify(poll.options) },
+          ],
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed");
+          return res.json();
+        })
         .then((content) => {
           set((state) => ({
             polls: state.polls.map((p) =>
@@ -240,13 +260,24 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
-      tapestry
-        .createContent(profileId, [
-          { key: "type", value: "task" },
-          { key: "title", value: task.title },
-          { key: "description", value: task.description },
-          { key: "location", value: task.location },
-        ])
+      fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `task-${task.id}`,
+          profileId,
+          properties: [
+            { key: "type", value: "task" },
+            { key: "title", value: task.title },
+            { key: "description", value: task.description },
+            { key: "location", value: task.location },
+          ],
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed");
+          return res.json();
+        })
         .then((content) => {
           set((state) => ({
             tasks: state.tasks.map((t) =>
@@ -264,13 +295,24 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
-      tapestry
-        .createContent(profileId, [
-          { key: "type", value: "crowdfund" },
-          { key: "title", value: crowdfund.title },
-          { key: "description", value: crowdfund.description },
-          { key: "goal", value: String(crowdfund.goal) },
-        ])
+      fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `crowdfund-${crowdfund.id}`,
+          profileId,
+          properties: [
+            { key: "type", value: "crowdfund" },
+            { key: "title", value: crowdfund.title },
+            { key: "description", value: crowdfund.description },
+            { key: "goal", value: String(crowdfund.goal) },
+          ],
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed");
+          return res.json();
+        })
         .then((content) => {
           set((state) => ({
             crowdfunds: state.crowdfunds.map((cf) =>
@@ -316,14 +358,25 @@ export const useTribeStore = create<TribeStore>((set, get) => ({
     const authState = useAuthStore.getState();
     const profileId = authState.tapestryProfile?.id;
     if (profileId) {
-      tapestry
-        .createContent(profileId, [
-          { key: "type", value: "event" },
-          { key: "title", value: event.title },
-          { key: "description", value: event.description },
-          { key: "location", value: event.location },
-          { key: "cityId", value: event.cityId },
-        ])
+      fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `event-${event.id}`,
+          profileId,
+          properties: [
+            { key: "type", value: "event" },
+            { key: "title", value: event.title },
+            { key: "description", value: event.description },
+            { key: "location", value: event.location },
+            { key: "cityId", value: event.cityId },
+          ],
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed");
+          return res.json();
+        })
         .then((content) => {
           set((state) => ({
             events: state.events.map((e) =>
