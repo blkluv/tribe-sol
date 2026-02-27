@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart, MessageCircle, Share2, Bookmark, Coins } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Cast } from "@/types";
 import { cn, formatNumber } from "@/lib/utils";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { useLike } from "@/hooks/use-like";
+import { useTip } from "@/hooks/use-tip";
 import { useAuth } from "@/hooks/use-auth";
 import { FollowButton } from "@/components/tribe/follow-button";
+import { TipButton } from "@/components/tribe/tip-button";
 import { CommentSheet } from "./comment-sheet";
 
 interface CastCardProps {
@@ -17,14 +19,23 @@ interface CastCardProps {
 }
 
 export function CastCard({ cast }: CastCardProps) {
-  const { likeCast, bookmarkCast } = useTribeStore();
+  const { likeCast, bookmarkCast, tipCast } = useTribeStore();
   const { isAuthenticated } = useAuth();
   const { isLiked, likeCount, toggleLike } = useLike(
     cast.id,
     cast.isLiked,
     cast.likes
   );
+  const { sendTip, isWalletReady } = useTip();
   const [showComments, setShowComments] = useState(false);
+
+  const handleTip = async (amount: number) => {
+    const result = await sendTip(cast.id, amount, cast.user.username);
+    if (result.success) {
+      tipCast(cast.id, amount);
+    }
+    return result;
+  };
 
   const handleLike = async () => {
     // Always update local store
@@ -37,7 +48,7 @@ export function CastCard({ cast }: CastCardProps) {
 
   return (
     <>
-      <div className="bg-white border-b border-muted/30">
+      <div className="bg-background border-b border-muted/30">
         {/* Header */}
         <div className="flex items-center gap-3 px-3 py-3">
           <div className="relative h-9 w-9 overflow-hidden rounded-full ring-1 ring-muted">
@@ -112,12 +123,11 @@ export function CastCard({ cast }: CastCardProps) {
             </button>
           </div>
           <div className="flex items-center gap-3">
-            {cast.tipCount > 0 && (
-              <button className="flex items-center gap-1.5 rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-600 transition-colors hover:bg-yellow-400/20">
-                <Coins className="h-3.5 w-3.5" />
-                Tip {cast.tipCount}
-              </button>
-            )}
+            <TipButton
+              tipCount={cast.tipCount}
+              onTip={handleTip}
+              isWalletReady={isWalletReady}
+            />
             <motion.button
               whileTap={{ scale: 0.85 }}
               onClick={() => bookmarkCast(cast.id)}

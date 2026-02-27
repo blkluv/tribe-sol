@@ -15,6 +15,8 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WalletButton } from "@/components/tribe/wallet-button";
+import { useNotificationStore } from "@/store/use-notification-store";
 
 const mainLinks = [
   { id: "home", label: "Home", icon: Home, href: "/home" },
@@ -33,6 +35,7 @@ const secondaryLinks = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   return (
     <aside className="hidden h-screen flex-col border-r bg-background sticky top-0 md:flex md:w-20 lg:w-64">
@@ -83,6 +86,7 @@ export function SidebarNav() {
           {secondaryLinks.map((link) => {
             const isActive = pathname.startsWith(link.href);
             const Icon = link.icon;
+            const showBadge = link.id === "notifications" && unreadCount > 0;
             return (
               <Link
                 key={link.id}
@@ -94,12 +98,19 @@ export function SidebarNav() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon
-                  className={cn(
-                    "h-7 w-7 transition-transform group-hover:scale-110",
-                    isActive && "stroke-[3px]"
+                <div className="relative">
+                  <Icon
+                    className={cn(
+                      "h-7 w-7 transition-transform group-hover:scale-110",
+                      isActive && "stroke-[3px]"
+                    )}
+                  />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
                   )}
-                />
+                </div>
                 <span className="text-base lg:block hidden tracking-tight">{link.label}</span>
               </Link>
             );
@@ -107,11 +118,9 @@ export function SidebarNav() {
         </div>
       </nav>
 
-      <div className="p-4 lg:p-6 w-full">
-        <button className="flex w-full items-center gap-4 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:p-3 transition-all active:scale-95">
-          <Settings className="h-7 w-7" />
-          <span className="text-base lg:block hidden font-medium">More</span>
-        </button>
+      {/* Wallet connection indicator */}
+      <div className="p-4 lg:p-6 w-full space-y-3">
+        <WalletButton className="w-full justify-center lg:justify-start" compact={false} />
       </div>
     </aside>
   );
