@@ -11,6 +11,8 @@ import { PollCard } from "./poll-card";
 import { EventCard } from "./event-card";
 import { TaskCard } from "./task-card";
 import { CrowdfundCard } from "./crowdfund-card";
+import { useAuth } from "@/hooks/use-auth";
+import { WalletButton } from "@/components/tribe/wallet-button";
 
 // Lazy-load cities data
 let citiesCache: City[] | null = null;
@@ -23,6 +25,7 @@ async function getCities(): Promise<City[]> {
 
 export function HomeFeed() {
   const { casts, polls, events, tasks, crowdfunds, currentCity, tribes, switchCity, isSwitchingCity } = useTribeStore();
+  const { profile } = useAuth();
   const [allCities, setAllCities] = useState<City[]>([]);
 
   // Load cities list on first render
@@ -77,23 +80,31 @@ export function HomeFeed() {
 
   return (
     <div className="pb-24 bg-[#fcfcfc] min-h-screen">
-      {/* Search & Header (Unique Convos Style) */}
+      {/* Redesigned Header per User Request */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-[#f0f0f0]">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-black text-white text-lg font-black tracking-tighter shadow-xl shadow-black/10">
             {currentCity.name.charAt(0)}
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">{currentCity.name}</h1>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Local Pulse</p>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold tracking-tight leading-none">{currentCity.name}</h1>
+            <button
+              onClick={() => {/* Trigger city switcher modal */ }}
+              className="text-[11px] font-bold uppercase tracking-widest text-primary hover:opacity-70 transition-opacity text-left mt-1.5"
+            >
+              Switch City
+            </button>
           </div>
         </div>
-        <button
-          onClick={() => {/* Open city switcher */ }}
-          className="rounded-full bg-muted/50 px-4 py-2 text-xs font-bold hover:bg-muted transition-colors"
-        >
-          Switch City
-        </button>
+
+        <div className="flex flex-col items-end gap-1.5">
+          <WalletButton className="h-10 rounded-xl px-4 text-xs font-bold" />
+          {profile && (
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              @{profile.username}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Tribe Pulse Bar (Alternative to Stories) */}

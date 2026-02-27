@@ -143,11 +143,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-white">
       <div className="flex flex-1 justify-center">
-        <main className="w-full max-w-[1240px] flex px-4">
-          <div className="flex-1 w-full max-w-[700px] min-h-screen pb-32 pt-6 bg-white shrink-0">
+        <main className="w-full max-w-[800px] flex px-4">
+          <div className="flex-1 w-full min-h-screen pb-32 pt-6 bg-white">
             {children}
           </div>
-          <RightSidebar />
         </main>
       </div>
       <BottomNav />
