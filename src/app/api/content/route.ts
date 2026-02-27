@@ -9,6 +9,7 @@ const apiKey = process.env.TAPESTRY_API_KEY || "";
  */
 export async function GET(req: NextRequest) {
   const profileId = req.nextUrl.searchParams.get("profileId") || undefined;
+  const requestingProfileId = req.nextUrl.searchParams.get("requestingProfileId") || undefined;
   const page = req.nextUrl.searchParams.get("page") || undefined;
   const pageSize = req.nextUrl.searchParams.get("pageSize") || undefined;
 
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
     const data = await socialfi.contents.contentsList({
       apiKey,
       profileId,
+      requestingProfileId,
       page,
       pageSize,
     });
