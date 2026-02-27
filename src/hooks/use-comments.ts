@@ -12,6 +12,56 @@ interface UseCommentsReturn {
   fetchComments: () => Promise<void>;
   addComment: (text: string) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;
+  expandedReplies: Set<string>;
+  toggleReplies: (commentId: string) => void;
+  fetchReplies: (commentId: string) => Promise<void>;
+  addReply: (commentId: string, text: string) => Promise<void>;
+  replyingTo: string | null;
+  setReplyingTo: (commentId: string | null) => void;
+}
+
+interface RawComment {
+  comment: { id: string; text: string; created_at: number };
+  contentId?: string;
+  author?: {
+    id: string;
+    username: string;
+    bio?: string | null;
+    image?: string | null;
+    namespace: string;
+    created_at: number;
+  };
+  recentReplies?: RawComment[];
+}
+
+function mapAuthor(author: RawComment["author"]) {
+  if (!author) return undefined;
+  return {
+    id: author.id,
+    blockchain: "SOLANA" as const,
+    walletAddress: "",
+    username: author.username,
+    bio: author.bio || undefined,
+    image: author.image || undefined,
+    namespace: author.namespace,
+    created_at: String(author.created_at),
+  };
+}
+
+function mapComment(c: RawComment, fallbackContentId: string): TapestryComment {
+  const recentReplies = c.recentReplies || [];
+  return {
+    id: c.comment.id,
+    profileId: c.author?.id || "",
+    contentId: c.contentId || fallbackContentId,
+    text: c.comment.text,
+    created_at: String(c.comment.created_at),
+    profile: mapAuthor(c.author),
+    replies: recentReplies.length > 0
+      ? recentReplies.map((r) => mapComment(r, fallbackContentId))
+      : undefined,
+    replyCount: recentReplies.length || undefined,
+  };
 }
 
 export function useComments(contentId: string | null): UseCommentsReturn {
@@ -20,6 +70,10 @@ export function useComments(contentId: string | null): UseCommentsReturn {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(
+    new Set()
+  );
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     if (!contentId) return;
@@ -34,31 +88,8 @@ export function useComments(contentId: string | null): UseCommentsReturn {
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
 
-      // Map SDK response shape to our TapestryComment type
       const mapped: TapestryComment[] = (data.comments || []).map(
-        (c: {
-          comment: { id: string; text: string; created_at: number };
-          contentId?: string;
-          author?: { id: string; username: string; bio?: string | null; image?: string | null; namespace: string; created_at: number };
-        }) => ({
-          id: c.comment.id,
-          profileId: c.author?.id || "",
-          contentId: c.contentId || contentId,
-          text: c.comment.text,
-          created_at: String(c.comment.created_at),
-          profile: c.author
-            ? {
-                id: c.author.id,
-                blockchain: "SOLANA",
-                walletAddress: "",
-                username: c.author.username,
-                bio: c.author.bio || undefined,
-                image: c.author.image || undefined,
-                namespace: c.author.namespace,
-                created_at: String(c.author.created_at),
-              }
-            : undefined,
-        })
+        (c: RawComment) => mapComment(c, contentId)
       );
       setComments(mapped);
       setTotal(mapped.length);
@@ -73,7 +104,8 @@ export function useComments(contentId: string | null): UseCommentsReturn {
 
   const addComment = useCallback(
     async (text: string) => {
-      if (!contentId || !isAuthenticated || !profile?.id || !text.trim()) return;
+      if (!contentId || !isAuthenticated || !profile?.id || !text.trim())
+        return;
 
       setIsLoading(true);
 
@@ -122,11 +154,125 @@ export function useComments(contentId: string | null): UseCommentsReturn {
         );
         if (!res.ok) throw new Error("Failed");
       } catch {
-        // Refetch on failure to restore correct state
         fetchComments();
       }
     },
     [fetchComments]
+  );
+
+  const fetchReplies = useCallback(
+    async (commentId: string) => {
+      try {
+        const res = await fetch(
+          `/api/comments?commentId=${encodeURIComponent(commentId)}`
+        );
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const data = await res.json();
+
+        const mapped: TapestryComment[] = (data.comments || []).map(
+          (c: RawComment) => mapComment(c, contentId || "")
+        );
+
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, replies: mapped, replyCount: mapped.length }
+              : c
+          )
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load replies"
+        );
+      }
+    },
+    [contentId]
+  );
+
+  const toggleReplies = useCallback(
+    (commentId: string) => {
+      setExpandedReplies((prev) => {
+        const next = new Set(prev);
+        if (next.has(commentId)) {
+          next.delete(commentId);
+        } else {
+          next.add(commentId);
+          // Always fetch latest replies when expanding
+          fetchReplies(commentId);
+        }
+        return next;
+      });
+    },
+    [fetchReplies]
+  );
+
+  const addReply = useCallback(
+    async (commentId: string, text: string) => {
+      if (!contentId || !isAuthenticated || !profile?.id || !text.trim()) return;
+
+      try {
+        const res = await fetch("/api/comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: profile.id,
+            contentId,
+            commentId,
+            text: text.trim(),
+          }),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || `API error ${res.status}`);
+        }
+        const data = await res.json();
+
+        const newReply: TapestryComment = {
+          id: data.id || `temp-${Date.now()}`,
+          profileId: profile.id,
+          contentId,
+          text: data.text || text.trim(),
+          created_at: String(data.created_at || Date.now()),
+          profile: profile
+            ? {
+                id: profile.id,
+                blockchain: "SOLANA",
+                walletAddress: "",
+                username: profile.username,
+                bio: profile.bio || undefined,
+                image: profile.image || undefined,
+                namespace: "",
+                created_at: "",
+              }
+            : undefined,
+        };
+
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? {
+                  ...c,
+                  replies: [...(c.replies || []), newReply],
+                  replyCount: (c.replyCount || 0) + 1,
+                }
+              : c
+          )
+        );
+        // Auto-expand replies so the new reply is visible
+        setExpandedReplies((prev) => {
+          const next = new Set(prev);
+          next.add(commentId);
+          return next;
+        });
+        setReplyingTo(null);
+      } catch (err) {
+        console.error("addReply error:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to add reply"
+        );
+      }
+    },
+    [contentId, isAuthenticated, profile]
   );
 
   return {
@@ -137,5 +283,11 @@ export function useComments(contentId: string | null): UseCommentsReturn {
     fetchComments,
     addComment,
     deleteComment: removeComment,
+    expandedReplies,
+    toggleReplies,
+    fetchReplies,
+    addReply,
+    replyingTo,
+    setReplyingTo,
   };
 }
