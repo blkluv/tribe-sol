@@ -20,8 +20,6 @@ import {
   Clock,
 } from "lucide-react";
 import { useTribeStore } from "@/store/use-tribe-store";
-import { useAuth } from "@/hooks/use-auth";
-import * as tapestry from "@/lib/tapestry";
 import type { Cast, Poll, ExploreItem } from "@/types";
 
 const createOptions = [
@@ -74,7 +72,6 @@ type Mode = "menu" | "cast" | "event" | "poll" | "task" | "crowdfund" | "channel
 export default function CreatePage() {
   const router = useRouter();
   const { addCast, addPoll, addEvent, addTask, addCrowdfund, addTribe, currentUser, currentCity } = useTribeStore();
-  const { isAuthenticated, profile } = useAuth();
   const [mode, setMode] = useState<Mode>("menu");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -143,19 +140,7 @@ export default function CreatePage() {
     };
 
     addCast(newCast);
-
-    if (isAuthenticated && profile?.id) {
-      try {
-        await tapestry.createContent(profile.id, [
-          { key: "type", value: "cast" },
-          { key: "caption", value: caption.trim() },
-          { key: "imageUrl", value: newCast.imageUrl },
-          ...(currentCity ? [{ key: "cityId", value: currentCity.id }] : []),
-        ]);
-      } catch {
-        // Non-fatal
-      }
-    }
+    // Tapestry persistence handled by store's addCast
 
     setIsSubmitting(false);
     router.push("/home");

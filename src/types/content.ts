@@ -20,6 +20,7 @@ export interface Cast {
   totalTips: number;
   cityId: string;
   tribeId?: string;
+  tapestryContentId?: string;
 }
 
 export interface PollOption {
@@ -37,6 +38,7 @@ export interface Poll {
   imageUrl?: string;
   votes: Record<string, number>;
   userVote?: string;
+  tapestryContentId?: string;
 }
 
 export interface Task {
@@ -51,6 +53,7 @@ export interface Task {
   timeAgo: string;
   reward?: string;
   isUrgent: boolean;
+  tapestryContentId?: string;
 }
 
 export interface Crowdfund {
@@ -65,4 +68,5 @@ export interface Crowdfund {
   raised: number;
   contributors: number;
   timeAgo: string;
+  tapestryContentId?: string;
 }

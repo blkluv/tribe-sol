@@ -16,4 +16,5 @@ export interface ExploreItem {
   isTrending: boolean;
   cityId: string;
   coordinates?: Coordinates;
+  tapestryContentId?: string;
 }

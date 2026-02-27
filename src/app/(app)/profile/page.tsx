@@ -6,6 +6,7 @@ import { Settings, MapPin, BadgeCheck, Star, Award, PlusCircle, Wallet, Heart, M
 import Link from "next/link";
 import { useTribeStore } from "@/store/use-tribe-store";
 import { useAuth } from "@/hooks/use-auth";
+import { useTapestryProfile } from "@/hooks/use-tapestry-profile";
 import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
 import { cn, formatNumber } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -58,6 +59,9 @@ function ActivityGrid() {
 export default function ProfilePage() {
   const { currentUser, updateCurrentUser } = useTribeStore();
   const { isAuthenticated, profile: tapestryProfile, walletAddress } = useAuth();
+  const { profile: freshProfile } = useTapestryProfile(
+    isAuthenticated ? tapestryProfile?.id : null
+  );
   const { share, showToast } = useShare();
   const [activeTab, setActiveTab] = useState("Activity");
   const [isEditing, setIsEditing] = useState(false);
@@ -78,17 +82,18 @@ export default function ProfilePage() {
   const levelConfig = karma ? karmaLevelConfig[karma.level] : null;
   const progress = karma ? getKarmaProgress(karma.totalKarma, karma.level) : 0;
 
-  // Use Tapestry social counts when authenticated, mock data otherwise
-  const socialCounts = isAuthenticated && tapestryProfile?.socialCounts
-    ? tapestryProfile.socialCounts
+  // Use fresh Tapestry profile data when available, fall back to cached, then mock
+  const activeProfile = freshProfile || tapestryProfile;
+  const socialCounts = isAuthenticated && activeProfile?.socialCounts
+    ? activeProfile.socialCounts
     : { followers: 1200, following: 340, posts: 42 };
 
-  const displayName = isAuthenticated && tapestryProfile
-    ? tapestryProfile.username
+  const displayName = isAuthenticated && activeProfile
+    ? activeProfile.username
     : currentUser.displayName;
 
-  const displayBio = isAuthenticated && tapestryProfile?.bio
-    ? tapestryProfile.bio
+  const displayBio = isAuthenticated && activeProfile?.bio
+    ? activeProfile.bio
     : currentUser.bio;
 
   const displayAddress = walletAddress

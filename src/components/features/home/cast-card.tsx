@@ -22,8 +22,9 @@ interface CastCardProps {
 export function CastCard({ cast }: CastCardProps) {
   const { likeCast, bookmarkCast, tipCast } = useTribeStore();
   const { isAuthenticated } = useAuth();
+  const tapestryId = cast.tapestryContentId || null;
   const { isLiked, likeCount, toggleLike } = useLike(
-    cast.id,
+    tapestryId,
     cast.isLiked,
     cast.likes
   );
@@ -179,7 +180,7 @@ export function CastCard({ cast }: CastCardProps) {
       </div>
 
       <CommentSheet
-        contentId={cast.id}
+        contentId={tapestryId}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
         localCommentCount={cast.comments.length}
