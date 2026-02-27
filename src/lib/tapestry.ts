@@ -1,4 +1,3 @@
-import { env } from "./env";
 import type {
   TapestryProfile,
   TapestryContent,
@@ -8,8 +7,6 @@ import type {
   TapestryExecution,
 } from "@/types/tapestry";
 
-const BASE_URL = env.tapestryBaseUrl;
-const API_KEY = env.tapestryApiKey;
 const BLOCKCHAIN = "SOLANA";
 const EXECUTION: TapestryExecution = "FAST_UNCONFIRMED";
 
@@ -17,10 +14,9 @@ async function tapestryFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${BASE_URL}${path}`;
+  const url = `/api/tapestry${path}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(API_KEY ? { "x-api-key": API_KEY } : {}),
     ...(options.headers as Record<string, string>),
   };
 
