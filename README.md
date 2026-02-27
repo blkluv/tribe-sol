@@ -27,7 +27,8 @@ Open [http://localhost:3000](http://localhost:3000).
 Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_TAPESTRY_API_URL=<tapestry-api-url>
+TAPESTRY_API_KEY=<tapestry-api-key>
+TAPESTRY_BASE_URL=https://api.dev.usetapestry.dev/v1
 NEXT_PUBLIC_SOLANA_RPC_URL=<solana-rpc-url>
 ```
 
