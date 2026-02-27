@@ -44,7 +44,7 @@ export default function OnboardingPage() {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      router.push("/onboarding/city");
+      router.push("/onboarding/connect");
     }
   };
 
@@ -99,7 +99,7 @@ export default function OnboardingPage() {
           </button>
           {currentSlide < slides.length - 1 && (
             <button
-              onClick={() => router.push("/onboarding/city")}
+              onClick={() => router.push("/onboarding/connect")}
               className="py-2 text-sm text-muted-foreground hover:text-foreground"
             >
               Skip

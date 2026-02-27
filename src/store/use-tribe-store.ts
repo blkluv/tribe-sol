@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 import type { City, Cast, Poll, Task, Crowdfund, Tribe, ExploreItem, User } from "@/types";
+import * as tapestry from "@/lib/tapestry";
+import { useAuthStore } from "./use-auth-store";
 
 interface TribeStore {
   // State
@@ -14,6 +16,7 @@ interface TribeStore {
   tribes: Tribe[];
   currentUser: User | null;
   isSwitchingCity: boolean;
+  tapestryProfileId: string | null;
 
   // City actions
   setInitialData: (data: {
@@ -61,9 +64,12 @@ interface TribeStore {
 
   // Event actions
   addEvent: (event: ExploreItem) => void;
+
+  // Tapestry bridge
+  setTapestryProfileId: (id: string | null) => void;
 }
 
-export const useTribeStore = create<TribeStore>((set) => ({
+export const useTribeStore = create<TribeStore>((set, get) => ({
   currentCity: null,
   casts: [],
   events: [],
@@ -73,6 +79,7 @@ export const useTribeStore = create<TribeStore>((set) => ({
   tribes: [],
   currentUser: null,
   isSwitchingCity: false,
+  tapestryProfileId: null,
 
   setInitialData: (data) =>
     set({
@@ -104,14 +111,48 @@ export const useTribeStore = create<TribeStore>((set) => ({
     }, 400);
   },
 
-  likeCast: (castId) =>
+  likeCast: (castId) => {
+    // Optimistic local update
     set((state) => ({
       casts: state.casts.map((c) =>
         c.id === castId
           ? { ...c, isLiked: !c.isLiked, likes: c.isLiked ? c.likes - 1 : c.likes + 1 }
           : c
       ),
-    })),
+    }));
+
+    // Async Tapestry bridge
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      const cast = get().casts.find((c) => c.id === castId);
+      if (cast) {
+        if (cast.isLiked) {
+          // It was just liked (toggled from not liked)
+          tapestry.likeContent(profileId, castId).catch(() => {
+            // Rollback on failure
+            set((state) => ({
+              casts: state.casts.map((c) =>
+                c.id === castId
+                  ? { ...c, isLiked: false, likes: c.likes - 1 }
+                  : c
+              ),
+            }));
+          });
+        } else {
+          tapestry.unlikeContent(profileId, castId).catch(() => {
+            set((state) => ({
+              casts: state.casts.map((c) =>
+                c.id === castId
+                  ? { ...c, isLiked: true, likes: c.likes + 1 }
+                  : c
+              ),
+            }));
+          });
+        }
+      }
+    }
+  },
 
   bookmarkCast: (castId) =>
     set((state) => ({
@@ -129,8 +170,26 @@ export const useTribeStore = create<TribeStore>((set) => ({
       ),
     })),
 
-  addCast: (cast) =>
-    set((state) => ({ casts: [cast, ...state.casts] })),
+  addCast: (cast) => {
+    set((state) => ({ casts: [cast, ...state.casts] }));
+
+    // Async Tapestry bridge
+    const authState = useAuthStore.getState();
+    const profileId = authState.tapestryProfile?.id;
+    if (profileId) {
+      const city = get().currentCity;
+      tapestry
+        .createContent(profileId, [
+          { key: "type", value: "cast" },
+          { key: "caption", value: cast.caption },
+          { key: "imageUrl", value: cast.imageUrl },
+          ...(city ? [{ key: "cityId", value: city.id }] : []),
+        ])
+        .catch(() => {
+          console.warn("Failed to persist cast to Tapestry");
+        });
+    }
+  },
 
   votePoll: (pollId, optionId) =>
     set((state) => ({
@@ -173,4 +232,6 @@ export const useTribeStore = create<TribeStore>((set) => ({
 
   addEvent: (event) =>
     set((state) => ({ events: [event, ...state.events] })),
+
+  setTapestryProfileId: (id) => set({ tapestryProfileId: id }),
 }));

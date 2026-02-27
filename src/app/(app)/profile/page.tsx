@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Settings, MapPin, Calendar, BadgeCheck, Star, Award, PlusCircle } from "lucide-react";
+import { Settings, MapPin, BadgeCheck, Star, Award, PlusCircle, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useTribeStore } from "@/store/use-tribe-store";
+import { useAuth } from "@/hooks/use-auth";
 import { karmaLevelConfig, getKarmaProgress } from "@/lib/theme";
 import { cn, formatNumber } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -12,7 +13,8 @@ import { Progress } from "@/components/ui/progress";
 const tabs = ["Activity", "Badges", "Stats"];
 
 export default function ProfilePage() {
-  const { currentUser, currentCity } = useTribeStore();
+  const { currentUser } = useTribeStore();
+  const { isAuthenticated, profile: tapestryProfile, walletAddress } = useAuth();
   const [activeTab, setActiveTab] = useState("Activity");
 
   if (!currentUser) {
@@ -26,6 +28,23 @@ export default function ProfilePage() {
   const karma = currentUser.karma;
   const levelConfig = karma ? karmaLevelConfig[karma.level] : null;
   const progress = karma ? getKarmaProgress(karma.totalKarma, karma.level) : 0;
+
+  // Use Tapestry social counts when authenticated, mock data otherwise
+  const socialCounts = isAuthenticated && tapestryProfile?.socialCounts
+    ? tapestryProfile.socialCounts
+    : { followers: 1200, following: 340, posts: 42 };
+
+  const displayName = isAuthenticated && tapestryProfile
+    ? tapestryProfile.username
+    : currentUser.displayName;
+
+  const displayBio = isAuthenticated && tapestryProfile?.bio
+    ? tapestryProfile.bio
+    : currentUser.bio;
+
+  const displayAddress = walletAddress
+    ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
+    : null;
 
   return (
     <div className="bg-white min-h-screen">
@@ -59,11 +78,11 @@ export default function ProfilePage() {
           </div>
           <div className="flex-1 flex justify-around">
             <div className="text-center">
-              <p className="text-[16px] font-black">42</p>
+              <p className="text-[16px] font-black">{formatNumber(socialCounts.posts)}</p>
               <p className="text-[12px] text-muted-foreground font-medium">Posts</p>
             </div>
             <div className="text-center">
-              <p className="text-[16px] font-black">1.2k</p>
+              <p className="text-[16px] font-black">{formatNumber(socialCounts.followers)}</p>
               <p className="text-[12px] text-muted-foreground font-medium">Followers</p>
             </div>
             <div className="text-center">
@@ -75,14 +94,22 @@ export default function ProfilePage() {
 
         {/* Bio */}
         <div className="mb-6">
-          <h2 className="text-[14px] font-bold tracking-tight">{currentUser.displayName}</h2>
+          <h2 className="text-[14px] font-bold tracking-tight">{displayName}</h2>
           <p className="text-[14px] text-muted-foreground mb-1">@{currentUser.username}</p>
-          {currentUser.bio && (
-            <p className="text-[14px] leading-snug mb-2 whitespace-pre-wrap">{currentUser.bio}</p>
+          {displayBio && (
+            <p className="text-[14px] leading-snug mb-2 whitespace-pre-wrap">{displayBio}</p>
           )}
-          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5" />
-            <span className="font-medium">{currentUser.location || "Earth"}</span>
+          <div className="flex items-center gap-3 text-[13px] text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="font-medium">{currentUser.location || "Earth"}</span>
+            </div>
+            {isAuthenticated && displayAddress && (
+              <div className="flex items-center gap-1.5">
+                <Wallet className="h-3.5 w-3.5" />
+                <span className="font-mono text-[12px]">{displayAddress}</span>
+              </div>
+            )}
           </div>
         </div>
 

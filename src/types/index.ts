@@ -7,3 +7,4 @@ export * from "./chat";
 export * from "./map";
 export * from "./profile";
 export * from "./conference";
+export * from "./tapestry";
