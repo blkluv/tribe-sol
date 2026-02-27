@@ -2,11 +2,13 @@
 
 import { useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useAuthStore } from "@/store/use-auth-store";
 import * as tapestry from "@/lib/tapestry";
 
 export function useAuth() {
-  const { publicKey, connected, connecting, disconnect } = useWallet();
+  const { publicKey, connected, connecting, disconnect, wallet } = useWallet();
+  const { setVisible } = useWalletModal();
   const {
     status,
     walletAddress,
@@ -21,15 +23,12 @@ export function useAuth() {
 
   const hasSearched = useRef(false);
 
+  const address = publicKey?.toBase58() ?? null;
+  const isConnecting = connecting;
+
   // Sync wallet connection state
   useEffect(() => {
-    if (connecting) {
-      setStatus("connecting");
-      return;
-    }
-
-    if (connected && publicKey) {
-      const address = publicKey.toBase58();
+    if (connected && address) {
       setWalletAddress(address);
 
       // If we already have a profile cached, stay authenticated
@@ -57,7 +56,7 @@ export function useAuth() {
             // No profile found, that's fine — user will create one during onboarding
           });
       }
-    } else if (!connected && !connecting) {
+    } else if (!connected) {
       // Only reset if we were previously connected
       if (status !== "disconnected") {
         hasSearched.current = false;
@@ -66,8 +65,7 @@ export function useAuth() {
     }
   }, [
     connected,
-    connecting,
-    publicKey,
+    address,
     tapestryProfile,
     status,
     setStatus,
@@ -102,6 +100,10 @@ export function useAuth() {
     [walletAddress, setStatus, setTapestryProfile, setError]
   );
 
+  const login = useCallback(() => {
+    setVisible(true);
+  }, [setVisible]);
+
   const logout = useCallback(async () => {
     reset();
     await disconnect();
@@ -113,8 +115,10 @@ export function useAuth() {
     profile: tapestryProfile,
     error,
     isAuthenticated: status === "authenticated",
-    isConnected: connected,
+    isConnected: connected && !!address,
+    isConnecting,
     createProfile,
+    login,
     logout,
   };
 }
