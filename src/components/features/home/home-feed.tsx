@@ -131,7 +131,7 @@ export function HomeFeed() {
 
       {feedItems.length === 0 && (
         <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
-          <p className="text-xl font-bold tracking-tight">Quiet neighborhood...</p>
+          <p className="text-xl font-bold tracking-tight">Quiet NeBruhood...</p>
           <p className="text-sm font-medium">Be the first to share something in {currentCity.name}!</p>
         </div>
       )}
