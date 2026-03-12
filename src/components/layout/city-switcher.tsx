@@ -52,7 +52,7 @@ export function CitySwitcher({ isOpen, onOpenChange }: CitySwitcherProps) {
                         Choose your City
                     </DialogTitle>
                     <p className="text-sm font-medium text-muted-foreground mt-2">
-                        Explore tribes and pulses in a different neighborhood
+                        Explore tribes and pulses in a different NeBruhood
                     </p>
                 </DialogHeader>
 
