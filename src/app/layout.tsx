@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Tribe - Hyperlocal Social Network",
-  description: "Connect with your local community. Discover events, join tribes, and build meaningful connections in your neighborhood.",
+  title: "NeBruh - Hyperlocal Social Network",
+  description: "Connect with your local community. Discover events, join tribes, and build meaningful connections in your NeBruhood.",
 };
 
 export default function RootLayout({
