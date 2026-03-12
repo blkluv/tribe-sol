@@ -28,7 +28,7 @@ export default function TribesPage() {
 
   return (
     <div className="bg-[#fcfcfc] min-h-screen">
-      <AppHeader title="Tribes" />
+      <AppHeader title="NeBruh" />
 
       {/* Search & Categories Bar */}
       <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md px-6 py-4 space-y-4 border-b border-[#f0f0f0]">
@@ -36,7 +36,7 @@ export default function TribesPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Find your tribe..."
+            placeholder="Find your NeBruhs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-2xl border border-[#f0f0f0] bg-[#f9f9f9] py-3.5 pl-12 pr-4 text-[15px] font-bold outline-none transition-all focus:bg-white focus:ring-4 focus:ring-primary/5"
@@ -72,7 +72,7 @@ export default function TribesPage() {
         {joinedTribes.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold tracking-tight">Your Tribes</h2>
+              <h2 className="text-xl font-bold tracking-tight">Your NeBruhs</h2>
               <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 {joinedTribes.length} Joined
               </span>
@@ -93,7 +93,7 @@ export default function TribesPage() {
             <div className="rounded-[32px] bg-muted/30 p-8">
               <Users className="h-10 w-10 text-muted-foreground" />
             </div>
-            <p className="text-xl font-bold tracking-tight text-black">No tribes found</p>
+            <p className="text-xl font-bold tracking-tight text-black">No NeBruhs found</p>
           </div>
         )}
       </div>
