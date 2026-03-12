@@ -60,7 +60,7 @@ const features = [
     icon: Heart,
     title: "Social Feed",
     description:
-      "Share photo casts, like and comment on posts, bookmark your favorites, and build a following in your neighborhood.",
+      "Share photo casts, like and comment on posts, bookmark your favorites, and build a following in your NeBruhood.",
   },
   {
     icon: Coins,
@@ -90,11 +90,12 @@ const features = [
     icon: Banknote,
     title: "Crowdfunding",
     description:
-      "Rally your neighborhood behind a cause. Fund community gardens, local art projects, or neighborhood repairs.",
+      "Rally your NeBruhood behind a cause. Fund community gardens, local art projects, or neighborhood repairs.",
   },
 ];
 
 const cities = [
+  { name: "Atlanta", emoji: "🇺🇸", members: "8K+", tribes: "44 tribes" },
   { name: "Bangalore", emoji: "🇮🇳", members: "15K+", tribes: "42 tribes" },
   { name: "Mumbai", emoji: "🇮🇳", members: "23K+", tribes: "58 tribes" },
   { name: "Delhi", emoji: "🇮🇳", members: "19K+", tribes: "35 tribes" },
@@ -221,7 +222,7 @@ export default function LandingPage() {
           <div className="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-end">
             <h2 className="text-[32px] font-bold tracking-[-1px] text-black sm:text-[44px]">
               Everything you need for <br />
-              your neighborhood.
+              your NeBruhood.
             </h2>
             <p className="text-xl font-medium text-[#666]">
               From sharing moments to funding projects, Tribe gives you the tools
@@ -321,7 +322,7 @@ export default function LandingPage() {
               Earn karma. Build trust.
             </h2>
             <p className="mt-6 text-xl font-medium text-[#666]">
-              Every contribution builds your neighborhood reputation.
+              Every contribution builds your NeBruhood reputation.
             </p>
           </div>
 
@@ -352,7 +353,7 @@ export default function LandingPage() {
                 Active in {cities.length} cities.
               </h2>
               <p className="mx-auto max-w-[500px] text-lg font-medium opacity-60">
-                Join thousands of neighbors building stronger communities
+                Join thousands of NeBruhs building stronger communities
                 on the Solana blockchain.
               </p>
             </div>
@@ -379,7 +380,7 @@ export default function LandingPage() {
         {/* Footer */}
         <footer className="flex flex-col items-center justify-between gap-10 border-t border-[#f0f0f0] pt-16 sm:flex-row">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-black tracking-tighter">tribe</span>
+            <span className="text-2xl font-black tracking-tighter">NeBruh</span>
             <span className="text-xs font-bold opacity-30 uppercase tracking-widest">© 2025</span>
           </div>
 
@@ -387,7 +388,7 @@ export default function LandingPage() {
             <Link href="#" className="hover:text-black">Privacy</Link>
             <Link href="#" className="hover:text-black">Terms</Link>
             <Link href="#" className="hover:text-black">Twitter</Link>
-            <Link href="#" className="hover:text-black">Github</Link>
+            <Link href="#" className="hover:text-black">TikTok</Link>
           </div>
         </footer>
       </main>
