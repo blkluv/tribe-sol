@@ -190,7 +190,7 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">
                 Need help? Reach out to us:
               </p>
-              <p className="text-sm font-medium">support@tribe.community</p>
+              <p className="text-sm font-medium">hi@nebruh.com</p>
               <p className="text-xs text-muted-foreground">
                 We typically respond within 24 hours.
               </p>
@@ -213,14 +213,14 @@ export default function SettingsPage() {
           {expandedSection === "about" && (
             <div className="border-t bg-muted/5 px-4 py-4 space-y-3">
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black lowercase tracking-tight">tribe</span>
+                <span className="text-lg font-black lowercase tracking-tight">NeBruh</span>
                 <span className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   on Solana
                 </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Hyperlocal social networking built on Solana. Connect with your
-                neighborhood, join tribes, tip creators, and build real community.
+                NeBruhood, join tribes, tip creators, and build real community.
               </p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>Version 1.0.0</p>

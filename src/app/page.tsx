@@ -41,7 +41,7 @@ const steps = [
   },
   {
     step: "03",
-    title: "Join Your Tribes",
+    title: "Join Your NeBruhs",
     description:
       "Find communities that match your interests — cycling, food, tech, art, music, gaming, and 10+ more categories.",
     icon: Users,
@@ -140,7 +140,7 @@ export default function LandingPage() {
           className="mb-20 flex justify-center"
         >
           <div className="flex items-center gap-2">
-            <span className="text-[32px] font-black tracking-[-1.5px]">tribe</span>
+            <span className="text-[32px] font-black tracking-[-1.5px]">NeBruh</span>
             <div className="rounded-full bg-black px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
               on Solana
             </div>
@@ -164,7 +164,7 @@ export default function LandingPage() {
             transition={{ delay: 0.1, duration: 0.8 }}
             className="mx-auto mt-10 max-w-[600px] text-[20px] font-medium leading-[1.6] text-[#666] sm:text-[24px]"
           >
-            Connect with your neighborhood. Discover local events, join tribes,
+            Connect with your NeBruhood. Discover local events, join tribes,
             and build trust where you live.
           </motion.p>
 
@@ -225,7 +225,7 @@ export default function LandingPage() {
               your NeBruhood.
             </h2>
             <p className="text-xl font-medium text-[#666]">
-              From sharing moments to funding projects, Tribe gives you the tools
+              From sharing moments to funding projects, NeBruh gives you the tools
               to connect and grow your town.
             </p>
           </div>

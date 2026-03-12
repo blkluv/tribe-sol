@@ -38,7 +38,7 @@ export default function ConnectWalletPage() {
         <h1 className="mb-3 text-2xl font-bold">Connect Your Wallet</h1>
         <p className="mb-8 text-muted-foreground">
           Connect a Solana wallet to get started. Your wallet is your identity on
-          Tribe.
+          NeBruh.
         </p>
 
         <button
